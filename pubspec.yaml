@@ -25,6 +25,7 @@ dependencies:
   font_awesome_flutter:
   flutter_signin_button:
   page_transition:
+  image_picker:
   flutter:
     sdk: flutter
 

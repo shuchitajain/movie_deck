@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
+import 'package:movie_deck/ui/screens/add_movie_screen.dart';
+import 'package:page_transition/page_transition.dart';
 import '../config.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,8 +15,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String currentUser = "Shuchita";
   String movieName = "Star Wars";
-  String posterUrl = "https://www.digitalartsonline.co.uk/cmsdata/slideshow/3662115/star-wars-last-jedi-poster.jpg";
+  String posterUrl =
+      "https://www.digitalartsonline.co.uk/cmsdata/slideshow/3662115/star-wars-last-jedi-poster.jpg";
   String directedBy = "NN Kumar";
   late DateTime createdOn = DateTime.now();
   late DateTime updatedOn = DateTime.now();
@@ -24,19 +29,99 @@ class _HomeScreenState extends State<HomeScreen> {
     print(App.width(context));
     return Scaffold(
       backgroundColor: kWhiteColor,
+      resizeToAvoidBottomInset: false,
       body: NestedScrollView(
         headerSliverBuilder: (_, bool innerBoxIsScrolled) {
           return [
+            SliverPadding(
+              padding: EdgeInsets.only(top: 24),
+              sliver: SliverToBoxAdapter(
+                child: Container(
+                  height: 100,
+                  padding: EdgeInsets.only(left: 20, top: 20, right: 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Welcome,',
+                                style: GoogleFonts.ubuntu(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 4,
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                    text: currentUser + " ",
+                                    style: GoogleFonts.openSans(
+                                      fontSize: 20,
+                                      color: kPrimaryColor,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: "😀",
+                                      ),
+                                    ]),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {},
+                        child: Icon(
+                          Icons.logout,
+                          size: 30,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             SliverToBoxAdapter(
               child: Container(
-                margin: EdgeInsets.fromLTRB(20, 55, 20, 20),
+                height: 65,
+                margin: EdgeInsets.fromLTRB(20, 25, 20, 30),
+                child: TextFormField(
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
+                  decoration: InputDecoration(
+                    fillColor: Colors.grey[300],
+                    focusColor: Colors.grey[300],
+                    hoverColor: Colors.grey[300],
+                    contentPadding: EdgeInsets.all(20),
+                    hintText: "Search  for any movie",
+                    prefixIcon: Icon(
+                      FontAwesomeIcons.search,
+                      size: 18,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(28),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                margin: EdgeInsets.fromLTRB(20, 5, 20, 0),
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
-                        'MY WATCHLIST',
+                        'My Watchlist',
                         style: GoogleFonts.openSans(
-                          fontSize: 28,
+                          fontSize: 23,
                           fontWeight: FontWeight.bold,
                           wordSpacing: 6,
                         ),
@@ -45,9 +130,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     InkWell(
                       onTap: () {},
                       child: Icon(
-                        Icons.logout,
+                        FontAwesomeIcons.sort,
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -64,8 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   width: App.width(context) / 2.3,
                   decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8),
+                    color: kGreyColor,
                     image: DecorationImage(
                       image: NetworkImage(
                         posterUrl,
@@ -77,9 +162,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Positioned(
                   left: App.width(context) / 2.7,
                   child: Container(
-                    height: 220,
+                    height: 230,
                     width: App.width(context) / 1.9,
-                    margin: EdgeInsets.symmetric(vertical: 25),
+                    margin: EdgeInsets.symmetric(vertical: 20),
                     padding: EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: kWhiteColor,
@@ -103,10 +188,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 5,),
                         movieDetails("Directed by:", directedBy),
                         movieDetails("Created on:", createdOn.toString()),
                         movieDetails("Last Updated on", updatedOn.toString()),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(onPressed: (){}, icon: Icon(Icons.edit, size: 20,)),
+                            IconButton(onPressed: (){}, icon: Icon(Icons.delete, size: 20,)),
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -122,7 +213,11 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 70,
         child: FittedBox(
           child: FloatingActionButton(
-            onPressed: (){},
+            onPressed: () => Navigator.of(context).push(
+              PageTransition(
+                  child: AddMovieScreen(),
+                  type: PageTransitionType.rightToLeft),
+            ),
             elevation: 10,
             backgroundColor: kPrimaryColor,
             child: Icon(Icons.add),

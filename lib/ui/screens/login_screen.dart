@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signin_button/button_list.dart';
-import 'package:flutter_signin_button/button_view.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
 import 'package:movie_deck/ui/screens/home_screen.dart';
 import 'package:movie_deck/ui/screens/signup_screen.dart';
 import 'package:movie_deck/ui/widgets/app_logo_widget.dart';
 import 'package:movie_deck/ui/widgets/back_button_widget.dart';
 import 'package:movie_deck/ui/widgets/bezier_container_widget.dart';
+import 'package:movie_deck/ui/widgets/reusable_button_widget.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../config.dart';
@@ -34,47 +32,14 @@ class _LoginScreenState extends State<LoginScreen> {
             height: 10,
           ),
           TextField(
-              obscureText: isPassword,
-              decoration: InputDecoration(
-                  border: InputBorder.none,
-                  fillColor: Color(0xfff3f3f4),
-                  filled: true))
+            obscureText: isPassword,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              fillColor: Color(0xfff3f3f4),
+              filled: true,
+            ),
+          )
         ],
-      ),
-    );
-  }
-
-  Widget _submitButton() {
-    return InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          PageTransition(
-            type: PageTransitionType.rightToLeft,
-            child: HomeScreen(),
-          ),
-        );
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 15),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                  color: Colors.grey.shade200,
-                  offset: Offset(2, 4),
-                  blurRadius: 5,
-                  spreadRadius: 2)
-            ],
-            gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [Color(0xfffbb448), Color(0xfff7892b)])),
-        child: Text(
-          'Login',
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
       ),
     );
   }
@@ -169,7 +134,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   _entryField("Email"),
                   _entryField("Password", isPassword: true),
                   SizedBox(height: 20),
-                  _submitButton(),
+                  submitButton(
+                    context: context,
+                    text: "Login",
+                    onTap: () => Navigator.of(context).push(
+                      PageTransition(
+                        type: PageTransitionType.rightToLeft,
+                        child: HomeScreen(),
+                      ),
+                    ),
+                  ),
                   _divider(),
                   Container(
                     height: 55,

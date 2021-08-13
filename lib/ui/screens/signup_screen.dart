@@ -4,6 +4,7 @@ import 'package:movie_deck/ui/screens/login_screen.dart';
 import 'package:movie_deck/ui/widgets/app_logo_widget.dart';
 import 'package:movie_deck/ui/widgets/back_button_widget.dart';
 import 'package:movie_deck/ui/widgets/bezier_container_widget.dart';
+import 'package:movie_deck/ui/widgets/reusable_button_widget.dart';
 import 'package:page_transition/page_transition.dart';
 import '../../constants.dart';
 
@@ -41,39 +42,15 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _registerButton() {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(vertical: 15),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(5)),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-                color: Colors.grey.shade200,
-                offset: Offset(2, 4),
-                blurRadius: 5,
-                spreadRadius: 2)
-          ],
-          gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [Color(0xfffbb448), Color(0xfff7892b)])),
-      child: Text(
-        'Register Now',
-        style: TextStyle(fontSize: 20, color: Colors.white),
-      ),
-    );
-  }
-
   Widget _loginLabel() {
     return InkWell(
       onTap: () {
         Navigator.pushReplacement(
-            context, PageTransition(
-          type: PageTransitionType.rightToLeft,
-          child: LoginScreen(),
-        ),
+          context,
+          PageTransition(
+            type: PageTransitionType.rightToLeft,
+            child: LoginScreen(),
+          ),
         );
       },
       child: Container(
@@ -133,7 +110,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     SizedBox(
                       height: 30,
                     ),
-                    _registerButton(),
+                    submitButton(
+                      context: context,
+                      text: "Register",
+                      onTap: () => print("registered"),
+                    ),
                     SizedBox(
                       height: 50,
                     ),
