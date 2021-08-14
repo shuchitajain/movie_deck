@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:movie_deck/repository/user_repository.dart';
 import 'package:movie_deck/ui/screens/onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {

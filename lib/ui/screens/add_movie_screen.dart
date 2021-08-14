@@ -194,7 +194,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Row(
                       children: [
                         backButton(context),
@@ -204,7 +204,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                         Text(
                           "Add a movie",
                           style: GoogleFonts.ubuntu(
-                            fontSize: 40,
+                            fontSize: 30,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -220,7 +220,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                       //_getFromCamera();
                     },
                     child: Container(
-                      height: 270,
+                      height: App.height(context)/3.7,
                       width: App.width(context) / 2.3,
                       margin: EdgeInsets.symmetric(vertical: 20),
                       decoration: BoxDecoration(
@@ -230,7 +230,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                           ? Center(
                               child: Icon(
                                 FontAwesomeIcons.camera,
-                                size: 50,
+                                size: 36,
                                 color: kBlackColor,
                               ),
                             )
@@ -245,6 +245,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                     controller: _movieNameController,
                     validator: (value) =>
                         (value!.isEmpty) ? "Movie name can't be empty" : "",
+                    icon: FontAwesomeIcons.film,
                     onTap: () {},
                   ),
                   formFieldWidget(
@@ -252,11 +253,13 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                     controller: _directorNameController,
                     validator: (value) =>
                         (value!.isEmpty) ? "Director name can't be empty" : "",
+                    icon: FontAwesomeIcons.user,
                     onTap: () {},
                   ),
                   formFieldWidget(
                     title: "Description (Optional)",
                     controller: _descriptionController,
+                    icon: FontAwesomeIcons.fileAlt,
                     onTap: () {},
                   ),
                   Padding(

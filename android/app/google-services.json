@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "993378690449",
+    "project_id": "moviedeck-d8d96",
+    "storage_bucket": "moviedeck-d8d96.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993378690449:android:4e9d2ad91998d3e6922630",
+        "android_client_info": {
+          "package_name": "com.example.movie_deck"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "993378690449-1ptnh86nedp690g60v75daeqc9d7619h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.movie_deck",
+            "certificate_hash": "40afd313ec790edfc5a47b9eee502d7be6267a2f"
+          }
+        },
+        {
+          "client_id": "993378690449-4o6fq418qqp4jto1iomgbd5eukaek7ne.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAc9sx2-I-iFLRrwibVVACAeX1Nsml5bno"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "993378690449-4o6fq418qqp4jto1iomgbd5eukaek7ne.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

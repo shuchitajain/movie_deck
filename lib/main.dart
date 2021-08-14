@@ -1,22 +1,47 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:movie_deck/repository/user_repository.dart';
+import 'package:movie_deck/ui/screens/home_screen.dart';
+import 'package:movie_deck/ui/screens/login_screen.dart';
+import 'package:movie_deck/ui/screens/onboarding_screen.dart';
 import 'package:movie_deck/ui/screens/splash_screen.dart';
+import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Movie Deck',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-        fontFamily: GoogleFonts.lato().fontFamily,
+    return ChangeNotifierProvider(
+      create: (context) => AuthProvider(FirebaseAuth.instance),
+      child: MaterialApp(
+        title: 'Movie Deck',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.orange,
+          fontFamily: GoogleFonts.lato().fontFamily,
+        ),
+        home: LandingPage(),
       ),
-      home: SplashScreen(),
     );
+  }
+}
+
+class LandingPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final firebaseUser = context.watch<AuthProvider>();
+    print(firebaseUser);
+    if(firebaseUser != null)
+      return HomeScreen();
+    else
+      return OnboardingScreen();
   }
 }

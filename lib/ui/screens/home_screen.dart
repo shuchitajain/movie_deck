@@ -3,9 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
+import 'package:movie_deck/repository/user_repository.dart';
 import 'package:movie_deck/ui/screens/add_movie_screen.dart';
+import 'package:movie_deck/ui/screens/onboarding_screen.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 import '../config.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -50,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 'Welcome,',
                                 style: GoogleFonts.ubuntu(
-                                  fontSize: 40,
+                                  fontSize: 36,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -59,9 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               RichText(
                                 text: TextSpan(
-                                    text: currentUser + " ",
+                                    text: currentUser + "! ",
                                     style: GoogleFonts.openSans(
-                                      fontSize: 20,
+                                      fontSize: 17,
                                       color: kPrimaryColor,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -69,14 +73,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                       TextSpan(
                                         text: "😀",
                                       ),
-                                    ]),
+                                    ],
+                                ),
                               ),
                             ],
                           ),
                         ),
                       ),
                       InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          var user =
+                          Provider.of<AuthProvider>(context, listen: false);
+                          user
+                              .signOut()
+                              .whenComplete(() =>
+                              Navigator.pushReplacement(context,
+                                  PageTransition(child: OnboardingScreen(),
+                                      type: PageTransitionType.rightToLeft)));
+                        },
                         child: Icon(
                           Icons.logout,
                           size: 30,
@@ -89,18 +103,15 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SliverToBoxAdapter(
               child: Container(
-                height: 65,
+                height: 50,
                 margin: EdgeInsets.fromLTRB(20, 25, 20, 30),
                 child: TextFormField(
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
                   decoration: InputDecoration(
                     fillColor: Colors.grey[300],
                     focusColor: Colors.grey[300],
                     hoverColor: Colors.grey[300],
-                    contentPadding: EdgeInsets.all(20),
-                    hintText: "Search  for any movie",
+                    contentPadding: EdgeInsets.only(top: 3),
+                    hintText: "Search for any movie",
                     prefixIcon: Icon(
                       FontAwesomeIcons.search,
                       size: 18,
@@ -121,9 +132,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         'My Watchlist',
                         style: GoogleFonts.openSans(
-                          fontSize: 23,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          wordSpacing: 6,
                         ),
                       ),
                     ),
@@ -131,6 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () {},
                       child: Icon(
                         FontAwesomeIcons.sort,
+                        size: 18,
                       ),
                     )
                   ],
@@ -141,86 +152,112 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         body: ListView.builder(
           itemCount: 10,
-          itemBuilder: (_, index) => Container(
-            height: 270,
-            margin: EdgeInsets.symmetric(vertical: 13, horizontal: 20),
-            child: Stack(
-              children: [
-                Container(
-                  width: App.width(context) / 2.3,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: kGreyColor,
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        posterUrl,
-                      ),
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: App.width(context) / 2.7,
-                  child: Container(
-                    height: 230,
-                    width: App.width(context) / 1.9,
-                    margin: EdgeInsets.symmetric(vertical: 20),
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: kWhiteColor,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          blurRadius: 15,
-                          spreadRadius: 6,
-                          offset: Offset(0, 0.76),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          movieName,
-                          style: GoogleFonts.lato(
-                            fontSize: 21,
-                            fontWeight: FontWeight.bold,
+          itemBuilder: (_, index) =>
+              Container(
+                height: App.height(context)/3.7,
+                margin: EdgeInsets.symmetric(vertical: 13, horizontal: 20),
+                child: Stack(
+                  children: [
+                    Container(
+                      width: App.width(context) / 2.3,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: kGreyColor,
+                        image: DecorationImage(
+                          image: NetworkImage(
+                            posterUrl,
                           ),
+                          fit: BoxFit.fill,
                         ),
-                        movieDetails("Directed by:", directedBy),
-                        movieDetails("Created on:", createdOn.toString()),
-                        movieDetails("Last Updated on", updatedOn.toString()),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(onPressed: (){}, icon: Icon(Icons.edit, size: 20,)),
-                            IconButton(onPressed: (){}, icon: Icon(Icons.delete, size: 20,)),
+                      ),
+                    ),
+                    Positioned(
+                      left: App.width(context) / 2.7,
+                      top: 13,
+                      bottom: 13,
+                      child: Container(
+                        width: App.width(context) / 2,
+                        padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                        decoration: BoxDecoration(
+                          color: kWhiteColor,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              blurRadius: 15,
+                              spreadRadius: 3,
+                              offset: Offset(0, 0.8),
+                            ),
                           ],
                         ),
-                      ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              movieName,
+                              style: GoogleFonts.lato(
+                                fontSize: 19,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            movieDetails("Directed by:", directedBy),
+                            movieDetails("Created on:",
+                                DateFormat('dd-MM-yyyy').format(createdOn)),
+                            movieDetails("Last Updated on:",
+                                DateFormat('dd-MM-yyyy').format(updatedOn)),
+                            Spacer(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                InkWell(
+                                    onTap: () {},
+                                    child: Icon(
+                                      Icons.edit,
+                                      size: 24,
+                                    )),
+                                SizedBox(
+                                  width: 13,
+                                ),
+                                InkWell(
+                                    onTap: () {},
+                                    child: Icon(
+                                      Icons.delete,
+                                      size: 24,
+                                    ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Container(
-        height: 70,
-        width: 70,
+        height: 60,
+        width: 60,
         child: FittedBox(
           child: FloatingActionButton(
-            onPressed: () => Navigator.of(context).push(
-              PageTransition(
-                  child: AddMovieScreen(),
-                  type: PageTransitionType.rightToLeft),
-            ),
+            onPressed: () =>
+                Navigator.of(context).push(
+                  PageTransition(
+                      child: AddMovieScreen(),
+                      type: PageTransitionType.rightToLeft),
+                ),
             elevation: 10,
             backgroundColor: kPrimaryColor,
-            child: Icon(Icons.add),
+            child: Icon(
+              Icons.add,
+              color: kWhiteColor,
+            ),
           ),
         ),
       ),
@@ -234,16 +271,16 @@ class _HomeScreenState extends State<HomeScreen> {
         text: TextSpan(
           text: title + "  ",
           style: GoogleFonts.lato(
-            fontSize: 14,
+            fontSize: 12,
             color: kGreyColor,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
           children: [
             TextSpan(
               text: data,
               style: GoogleFonts.lato(
-                fontSize: 14,
-                color: kPrimaryColor,
+                fontSize: 12.5,
+                color: kBlackColor,
                 fontWeight: FontWeight.w600,
               ),
             ),

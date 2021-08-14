@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movie_deck/repository/user_repository.dart';
 import 'package:movie_deck/ui/config.dart';
 import 'package:movie_deck/ui/screens/login_screen.dart';
 import 'package:movie_deck/ui/widgets/app_logo_widget.dart';
@@ -6,7 +7,9 @@ import 'package:movie_deck/ui/widgets/back_button_widget.dart';
 import 'package:movie_deck/ui/widgets/bezier_container_widget.dart';
 import 'package:movie_deck/ui/widgets/reusable_button_widget.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 import '../../constants.dart';
+import 'home_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -16,7 +19,17 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  Widget _entryField(String title, {bool isPassword = false}) {
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  bool _isPassword = true;
+
+  void _toggle() {
+    setState(() {
+      _isPassword = !_isPassword;
+    });
+  }
+
+  Widget _entryField(String title, IconData icon, TextEditingController controller, obscure, isPassword) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
       child: Column(
@@ -30,9 +43,25 @@ class _SignupScreenState extends State<SignupScreen> {
             height: 10,
           ),
           TextField(
-            obscureText: isPassword,
+            key: Key(title),
+            obscureText: obscure,
+            controller: controller,
+            keyboardType: !isPassword ? TextInputType.emailAddress : TextInputType.text,
+            onSubmitted: (val) {
+              FocusScope.of(context).unfocus();
+            },
             decoration: InputDecoration(
               border: InputBorder.none,
+              hintText: !isPassword ? "shuchitajain99@gmail.com" : "******",
+              prefixIcon: Icon(
+                  icon,
+              ),
+              suffix: isPassword ? InkWell(
+                child: Icon(Icons.remove_red_eye, color: kBlackColor, size: 20,),
+                onTap: (){
+                  _toggle();
+                },
+              ) : null,
               fillColor: Color(0xfff3f3f4),
               filled: true,
             ),
@@ -105,15 +134,29 @@ class _SignupScreenState extends State<SignupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    _entryField("Email "),
-                    _entryField("Password", isPassword: true),
+                    _entryField("Email ", Icons.email_outlined, _emailController, false, false),
+                    _entryField("Password", Icons.lock, _passwordController, _isPassword, true),
                     SizedBox(
                       height: 30,
                     ),
                     submitButton(
                       context: context,
                       text: "Register",
-                      onTap: () => print("registered"),
+                      onTap: () {
+                        FocusScope.of(context).unfocus();
+                        Provider.of<AuthProvider>(context, listen: false).signUpWithEmailAndPassword(
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text.trim(),
+                        );
+                        Navigator.of(context).push(
+                          PageTransition(
+                            type: PageTransitionType.rightToLeft,
+                            child: HomeScreen(),
+                          ),
+                        );
+                        _emailController.clear();
+                        _passwordController.clear();
+                      },
                     ),
                     SizedBox(
                       height: 50,

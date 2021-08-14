@@ -26,6 +26,15 @@ dependencies:
   flutter_signin_button:
   page_transition:
   image_picker:
+  intl:
+  firebase_auth:
+  firebase_core:
+  cloud_firestore:
+  google_sign_in:
+  flutter_secure_storage:
+  provider:
+  sqflite:
+  path:
   flutter:
     sdk: flutter
 
