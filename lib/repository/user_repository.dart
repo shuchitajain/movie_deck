@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:movie_deck/ui/config.dart';
 
@@ -36,7 +35,6 @@ class AuthProvider with ChangeNotifier {
       if(user != null) {
         await App.fss.write(key: "uid", value: user!.uid);
         await App.fss.write(key: "email", value: user!.email);
-        await App.fss.write(key: "signup error", value: "-1");
       }
       return -1;
     } on FirebaseAuthException catch (e) {
@@ -53,7 +51,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> signInWithEmailAndPassword({required String email, required String password}) async {
+  Future<int> signInWithEmailAndPassword({required String email, required String password}) async {
     try {
       await _auth.signInWithEmailAndPassword(
           email: email,
@@ -64,14 +62,16 @@ class AuthProvider with ChangeNotifier {
         await App.fss.write(key: "uid", value: user!.uid);
         await App.fss.write(key: "email", value: user!.email);
       }
-      return true;
+      return -1;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');
+        return 0;
       } else if (e.code == 'wrong-password') {
         print('Wrong password provided for that user.');
+        return 1;
       }
-      return false;
+      return 2;
     }
   }
 
@@ -89,11 +89,12 @@ class AuthProvider with ChangeNotifier {
       );
 
       await _auth.signInWithCredential(credential).then((auth) => _user = auth.user);
-      print(_user.toString());
+      print("Google user $_user");
       if(user != null) {
-        var fss = FlutterSecureStorage();
-        await fss.write(key: "uid", value: user!.uid);
-        await fss.write(key: "email", value: user!.email);
+        await App.fss.write(key: "uid", value: user!.uid);
+        await App.fss.write(key: "email", value: user!.email);
+        String? uid = await App.fss.read(key: "uid");
+        print("UID $uid");
       }
       return true;
     } catch (e) {
@@ -104,6 +105,7 @@ class AuthProvider with ChangeNotifier {
 
   Future signOut() async {
     _auth.signOut();
+    await App.fss.deleteAll();
     return Future.delayed(Duration.zero);
   }
 }

@@ -5,9 +5,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/repository/user_repository.dart';
 import 'package:movie_deck/ui/config.dart';
-import 'package:movie_deck/ui/screens/home_screen.dart';
-import 'package:movie_deck/ui/screens/login_screen.dart';
-import 'package:movie_deck/ui/screens/onboarding_screen.dart';
 import 'package:movie_deck/ui/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -41,9 +38,6 @@ class LandingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<AuthProvider>();
     print(firebaseUser.user);
-    if(firebaseUser.user != null)
-      return HomeScreen();
-    else
-      return OnboardingScreen();
+    return SplashScreen(currentUser: firebaseUser.user);
   }
 }

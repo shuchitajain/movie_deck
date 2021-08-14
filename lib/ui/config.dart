@@ -5,5 +5,5 @@ class App{
   static double height(BuildContext context) => MediaQuery.of(context).size.height;
   static double width(BuildContext context) => MediaQuery.of(context).size.width;
   static late FlutterSecureStorage secureStorage;
-  static get fss => secureStorage;
+  static FlutterSecureStorage get fss => secureStorage;
 }
