@@ -16,19 +16,17 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  late final currUser;
+  User? currUser;
 
   Future setUser() async {
     if (widget.currentUser == null) {
-      if (await App.fss.read(key: "email") != null) {
+      setState(() {
+        currUser = null;
+      });
+    } else {
         setState(() {
-          currUser = App.fss.read(key: "email");
+          currUser = widget.currentUser;
         });
-      } else {
-        setState(() {
-          currUser = widget.currentUser!.email;
-        });
-      }
     }
     return currUser;
   }

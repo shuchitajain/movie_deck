@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => AuthProvider(FirebaseAuth.instance),
+      create: (_) => AuthProvider(FirebaseAuth.instance),
       child: MaterialApp(
         title: 'Movie Deck',
         debugShowCheckedModeBanner: false,
@@ -36,8 +36,8 @@ class MyApp extends StatelessWidget {
 class LandingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final firebaseUser = context.watch<AuthProvider>();
-    print(firebaseUser.user);
-    return SplashScreen(currentUser: firebaseUser.user);
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+    print(firebaseUser);
+    return SplashScreen(currentUser: firebaseUser);
   }
 }
