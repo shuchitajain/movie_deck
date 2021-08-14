@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:movie_deck/ui/config.dart';
 
 class AuthProvider with ChangeNotifier {
   late final FirebaseAuth _auth;
@@ -24,7 +26,7 @@ class AuthProvider with ChangeNotifier {
   //   });
   // }
 
-  signUpWithEmailAndPassword({required String email, required String password}) async{
+  Future<int> signUpWithEmailAndPassword({required String email, required String password}) async{
     try {
       await _auth.createUserWithEmailAndPassword(
           email: email,
@@ -32,18 +34,22 @@ class AuthProvider with ChangeNotifier {
       ).then((auth) => _user = auth.user);
       print(_user.toString());
       if(user != null) {
-        var fss = FlutterSecureStorage();
-        await fss.write(key: "uid", value: user!.uid);
-        await fss.write(key: "email", value: user!.email);
+        await App.fss.write(key: "uid", value: user!.uid);
+        await App.fss.write(key: "email", value: user!.email);
+        await App.fss.write(key: "signup error", value: "-1");
       }
+      return -1;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
+      if (e.code == "email-already-in-use"){
+        print("already in use");
+        return 0;
       }
-    } catch (e) {
-      print(e);
+      else if(e.code == "weak-password") {
+        print("weak pass");
+        return 1;
+      }
+      print("done ${e.code}");
+      return 2;
     }
   }
 
@@ -55,9 +61,8 @@ class AuthProvider with ChangeNotifier {
       ).then((auth) => _user = auth.user);
       print(_user.toString());
       if(user != null) {
-        var fss = FlutterSecureStorage();
-        await fss.write(key: "uid", value: user!.uid);
-        await fss.write(key: "email", value: user!.email);
+        await App.fss.write(key: "uid", value: user!.uid);
+        await App.fss.write(key: "email", value: user!.email);
       }
       return true;
     } on FirebaseAuthException catch (e) {

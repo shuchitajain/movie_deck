@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/repository/user_repository.dart';
 import 'package:movie_deck/ui/config.dart';
 import 'package:movie_deck/ui/screens/login_screen.dart';
@@ -19,6 +20,7 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  final _formKey = GlobalKey<FormState>();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   bool _isPassword = true;
@@ -29,7 +31,13 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-  Widget _entryField(String title, IconData icon, TextEditingController controller, obscure, isPassword) {
+  Widget _entryField(
+      {required String title,
+      required IconData icon,
+      required TextEditingController controller,
+      obscure,
+      isPassword,
+      FormFieldValidator? validate}) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
       child: Column(
@@ -42,26 +50,31 @@ class _SignupScreenState extends State<SignupScreen> {
           SizedBox(
             height: 10,
           ),
-          TextField(
+          TextFormField(
             key: Key(title),
             obscureText: obscure,
             controller: controller,
-            keyboardType: !isPassword ? TextInputType.emailAddress : TextInputType.text,
-            onSubmitted: (val) {
-              FocusScope.of(context).unfocus();
-            },
+            validator: validate,
+            keyboardType:
+                !isPassword ? TextInputType.emailAddress : TextInputType.text,
             decoration: InputDecoration(
               border: InputBorder.none,
-              hintText: !isPassword ? "shuchitajain99@gmail.com" : "******",
+              hintText: !isPassword ? "example@gmail.com" : "******",
               prefixIcon: Icon(
-                  icon,
+                icon,
               ),
-              suffix: isPassword ? InkWell(
-                child: Icon(Icons.remove_red_eye, color: kBlackColor, size: 20,),
-                onTap: (){
-                  _toggle();
-                },
-              ) : null,
+              suffix: isPassword
+                  ? InkWell(
+                      child: Icon(
+                        Icons.remove_red_eye,
+                        color: kBlackColor,
+                        size: 20,
+                      ),
+                      onTap: () {
+                        _toggle();
+                      },
+                    )
+                  : null,
               fillColor: Color(0xfff3f3f4),
               filled: true,
             ),
@@ -112,61 +125,130 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: App.height(context),
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                top: -App.height(context) * .15,
-                right: -MediaQuery.of(context).size.width * .4,
-                child: BezierContainer(),
-              ),
-              Positioned(
-                left: 0,
-                top: App.height(context) * .15,
-                child: appLogoWidget(context),
-              ),
-              Container(
-                margin: EdgeInsets.only(top: App.height(context) * 0.25),
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    _entryField("Email ", Icons.email_outlined, _emailController, false, false),
-                    _entryField("Password", Icons.lock, _passwordController, _isPassword, true),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    submitButton(
-                      context: context,
-                      text: "Register",
-                      onTap: () {
-                        FocusScope.of(context).unfocus();
-                        Provider.of<AuthProvider>(context, listen: false).signUpWithEmailAndPassword(
-                          email: _emailController.text.trim(),
-                          password: _passwordController.text.trim(),
-                        );
-                        Navigator.of(context).push(
-                          PageTransition(
-                            type: PageTransitionType.rightToLeft,
-                            child: HomeScreen(),
-                          ),
-                        );
-                        _emailController.clear();
-                        _passwordController.clear();
-                      },
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    _loginLabel(),
-                  ],
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Container(
+            height: App.height(context),
+            child: Stack(
+              children: <Widget>[
+                Positioned(
+                  top: -App.height(context) * .15,
+                  right: -MediaQuery.of(context).size.width * .4,
+                  child: BezierContainer(),
                 ),
-              ),
-              Positioned(top: 40, left: 0, child: backButton(context)),
-            ],
+                Positioned(
+                  left: 0,
+                  top: App.height(context) * .15,
+                  child: appLogoWidget(context),
+                ),
+                Container(
+                  margin: EdgeInsets.only(top: App.height(context) * 0.25),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      _entryField(
+                          title: "Email ",
+                          icon: Icons.email_outlined,
+                          controller: _emailController,
+                          obscure: false,
+                          isPassword: false,
+                          validate: (email) {
+                            if(!email.isEmpty) {
+                              bool emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(email);
+                              return !emailValid ? "Invalid email address": null;
+                            } else {
+                              return "Please enter an email address";
+                            }
+                          }),
+                      _entryField(
+                          title: "Password",
+                          icon: Icons.lock,
+                          controller: _passwordController,
+                          obscure: _isPassword,
+                          isPassword: true,
+                          validate: (pass) => (pass!.isEmpty) ? "Please enter a password" : null,
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      submitButton(
+                        context: context,
+                        text: "Register",
+                        onTap: () async {
+                          print("Validated ${_formKey.currentState!.validate()}");
+                          if (_formKey.currentState!.validate()){
+                            _formKey.currentState!.save();
+                            FocusScope.of(context).unfocus();
+                            var res = await Provider.of<AuthProvider>(context, listen: false)
+                                .signUpWithEmailAndPassword(
+                              email: _emailController.text.trim(),
+                              password: _passwordController.text.trim(),
+                            ).then((value) async {
+                              if(value >= 0) {
+                                switch(value) {
+                                  case 0: {
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Email is already in use")));
+                                    break;
+                                  }
+                                  case 1 : {
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Password is too weak")));
+                                    break;
+                                  }
+                                }
+                              } else {
+                                bool success = await showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (_) {
+                                    Future.delayed(Duration(seconds: 1), () {
+                                      Navigator.of(context).pop(true);
+                                    });
+                                    return AlertDialog(
+                                      insetPadding: EdgeInsets.symmetric(horizontal: 10),
+                                      content: Container(
+                                        height: 80,
+                                        padding: EdgeInsets.only(right: 30),
+                                        child: Row(
+                                          children: [
+                                            CircularProgressIndicator(),
+                                            SizedBox(
+                                              width: 15,
+                                            ),
+                                            Text('Please wait, signing you up...', style: GoogleFonts.lato(fontWeight: FontWeight.bold,),),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                                if (success) {
+                                  Navigator.of(context).push(
+                                    PageTransition(
+                                      type: PageTransitionType.rightToLeft,
+                                      child: HomeScreen(),
+                                    ),
+                                  );
+                                  _emailController.clear();
+                                  _passwordController.clear();
+                                }
+                              }
+                            });
+                          }
+                        },
+                      ),
+                      SizedBox(
+                        height: 50,
+                      ),
+                      _loginLabel(),
+                    ],
+                  ),
+                ),
+                Positioned(top: 40, left: 0, child: backButton(context)),
+              ],
+            ),
           ),
         ),
       ),

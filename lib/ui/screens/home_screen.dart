@@ -29,8 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(App.height(context));
-    print(App.width(context));
     return Scaffold(
       backgroundColor: kWhiteColor,
       resizeToAvoidBottomInset: false,

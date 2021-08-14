@@ -244,7 +244,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                     title: "Movie name",
                     controller: _movieNameController,
                     validator: (value) =>
-                        (value!.isEmpty) ? "Movie name can't be empty" : "",
+                        (value!.isEmpty) ? "Movie name can't be empty" : null,
                     icon: FontAwesomeIcons.film,
                     onTap: () {},
                   ),
@@ -252,7 +252,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                     title: "Director name",
                     controller: _directorNameController,
                     validator: (value) =>
-                        (value!.isEmpty) ? "Director name can't be empty" : "",
+                        (value!.isEmpty) ? "Director name can't be empty" : null,
                     icon: FontAwesomeIcons.user,
                     onTap: () {},
                   ),
