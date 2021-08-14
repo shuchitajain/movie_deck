@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
+import 'package:movie_deck/ui/screens/dummy_screen.dart';
 import 'package:movie_deck/ui/widgets/app_logo_widget.dart';
 import 'package:movie_deck/ui/widgets/bezier_container_widget.dart';
 import 'package:page_transition/page_transition.dart';
@@ -19,7 +20,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _registerButton() {
     return InkWell(
       onTap: () {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           PageTransition(
             type: PageTransitionType.rightToLeft,
@@ -62,7 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           context,
           PageTransition(
             type: PageTransitionType.rightToLeft,
-            child: HomeScreen(),
+            child: DummyScreen(),
           ),
         );
       },

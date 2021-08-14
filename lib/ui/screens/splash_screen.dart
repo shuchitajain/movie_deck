@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:movie_deck/ui/config.dart';
 import 'package:movie_deck/ui/screens/home_screen.dart';
 import 'package:movie_deck/ui/screens/onboarding_screen.dart';
 import 'package:page_transition/page_transition.dart';

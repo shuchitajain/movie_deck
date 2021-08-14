@@ -19,13 +19,39 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String currentUser = "Shuchita";
+  String currentUser = "User";
   String movieName = "Star Wars";
   String posterUrl =
       "https://www.digitalartsonline.co.uk/cmsdata/slideshow/3662115/star-wars-last-jedi-poster.jpg";
   String directedBy = "NN Kumar";
   late DateTime createdOn = DateTime.now();
   late DateTime updatedOn = DateTime.now();
+
+  Padding movieDetails(String title, String data) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: RichText(
+        text: TextSpan(
+          text: title + "  ",
+          style: GoogleFonts.lato(
+            fontSize: 12,
+            color: kGreyColor,
+            fontWeight: FontWeight.bold,
+          ),
+          children: [
+            TextSpan(
+              text: data,
+              style: GoogleFonts.lato(
+                fontSize: 12.5,
+                color: kBlackColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -257,32 +283,6 @@ class _HomeScreenState extends State<HomeScreen> {
               color: kWhiteColor,
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Padding movieDetails(String title, String data) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: RichText(
-        text: TextSpan(
-          text: title + "  ",
-          style: GoogleFonts.lato(
-            fontSize: 12,
-            color: kGreyColor,
-            fontWeight: FontWeight.bold,
-          ),
-          children: [
-            TextSpan(
-              text: data,
-              style: GoogleFonts.lato(
-                fontSize: 12.5,
-                color: kBlackColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
         ),
       ),
     );
