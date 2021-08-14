@@ -6,7 +6,6 @@ import 'package:movie_deck/ui/widgets/app_logo_widget.dart';
 import 'package:movie_deck/ui/widgets/bezier_container_widget.dart';
 import 'package:page_transition/page_transition.dart';
 import '../config.dart';
-import 'home_screen.dart';
 import 'signup_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
-import 'package:movie_deck/repository/user_repository.dart';
+import 'package:movie_deck/providers/user_repository.dart';
 import 'package:movie_deck/ui/screens/home_screen.dart';
 import 'package:movie_deck/ui/screens/signup_screen.dart';
 import 'package:movie_deck/ui/widgets/app_logo_widget.dart';

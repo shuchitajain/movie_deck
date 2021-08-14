@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
+import 'package:movie_deck/providers/data_provider.dart';
 import 'package:movie_deck/ui/config.dart';
 import 'package:movie_deck/ui/widgets/back_button_widget.dart';
 import 'package:movie_deck/ui/widgets/form_field_widget.dart';
 import 'package:movie_deck/ui/widgets/reusable_button_widget.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class AddMovieScreen extends StatefulWidget {
   const AddMovieScreen({Key? key}) : super(key: key);
@@ -25,7 +27,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
 
   /// Get from gallery
   Future<File?> _getFromGallery() async {
-    PickedFile? pickedFile = await ImagePicker().getImage(
+    XFile? pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       maxWidth: 1800,
       maxHeight: 1800,
@@ -40,7 +42,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
 
   /// Get from Camera
   Future<File?> _getFromCamera() async {
-    PickedFile? pickedFile = await ImagePicker().getImage(
+    XFile? pickedFile = await ImagePicker().pickImage(
       source: ImageSource.camera,
       maxWidth: 1800,
       maxHeight: 1800,
@@ -267,7 +269,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                     child: submitButton(
                       context: context,
                       text: "Submit",
-                      onTap: () {
+                      onTap: () async {
                         if(_moviePoster == null) {
                           print("no image selected");
                           showErrorDialog();
@@ -275,6 +277,13 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                         if (_formKey.currentState!.validate()) {
                             _formKey.currentState!.save();
                             print("success");
+                            Provider.of<DataProvider>(context, listen: false).addMovie(
+                              _movieNameController.text.trim(),
+                              _directorNameController.text.trim(),
+                              _moviePoster!.path,
+                            );
+                            final items = Provider.of<DataProvider>(context, listen: false).items;
+                            print(items);
                         }
                       },
                     ),

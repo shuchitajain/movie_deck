@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
-import 'package:movie_deck/repository/user_repository.dart';
+import 'package:movie_deck/providers/data_provider.dart';
+import 'package:movie_deck/providers/user_repository.dart';
 import 'package:movie_deck/ui/screens/add_movie_screen.dart';
 import 'package:movie_deck/ui/screens/onboarding_screen.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import '../config.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -55,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final data = Provider.of<DataProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: kWhiteColor,
       resizeToAvoidBottomInset: false,
@@ -175,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ];
         },
         body: ListView.builder(
-          itemCount: 10,
+          itemCount: data.items.length,
           itemBuilder: (_, index) =>
               Container(
                 height: App.height(context)/3.7,
@@ -188,8 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(8),
                         color: kGreyColor,
                         image: DecorationImage(
-                          image: NetworkImage(
-                            posterUrl,
+                          image: FileImage(
+                            File(data.items[index].imageUrl)
                           ),
                           fit: BoxFit.fill,
                         ),
