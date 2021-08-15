@@ -13,27 +13,20 @@ class AuthProvider with ChangeNotifier {
   User? get user => _user;
   Stream<User?> get authState => _auth.idTokenChanges();
 
-  // AuthProvider.instance() : _auth = FirebaseAuth.instance {
-  //   _auth.authStateChanges().listen((User? user) {
-  //     if (user == null) {
-  //       print('User is currently signed out!');
-  //     } else {
-  //       _user = user;
-  //       print('User is signed in!');
-  //     }
-  //     notifyListeners();
-  //   });
-  // }
-
-  Future<int> signUpWithEmailAndPassword({required String email, required String password}) async{
+  Future<int> signUpWithEmailAndPassword({required String name, required String email, required String password}) async{
     try {
       await _auth.createUserWithEmailAndPassword(
           email: email,
           password: password,
       ).then((auth) => _user = auth.user);
+      await _user!.updateDisplayName(name);
+      await _user!.reload();
+      User? updatedUser = _auth.currentUser;
+      print('USERNAME IS: ${updatedUser!.displayName}');
       if(user != null) {
-        await App.fss.write(key: "uid", value: user!.uid);
-        await App.fss.write(key: "email", value: user!.email);
+        await App.fss.write(key: "uid", value: updatedUser.uid);
+        await App.fss.write(key: "email", value: updatedUser.email);
+        await App.fss.write(key: "name", value: updatedUser.displayName);
       }
       return -1;
     } on FirebaseAuthException catch (e) {
@@ -59,6 +52,7 @@ class AuthProvider with ChangeNotifier {
       if(user != null) {
         await App.fss.write(key: "uid", value: user!.uid);
         await App.fss.write(key: "email", value: user!.email);
+        await App.fss.write(key: "name", value: user!.displayName);
       }
       return -1;
     } on FirebaseAuthException catch (e) {
@@ -91,8 +85,8 @@ class AuthProvider with ChangeNotifier {
       if(user != null) {
         await App.fss.write(key: "uid", value: user!.uid);
         await App.fss.write(key: "email", value: user!.email);
-        String? uid = await App.fss.read(key: "uid");
-        print("UID $uid");
+        await App.fss.write(key: "name", value: user!.displayName);
+        print(await App.fss.read(key: "name"));
       }
       return true;
     } catch (e) {

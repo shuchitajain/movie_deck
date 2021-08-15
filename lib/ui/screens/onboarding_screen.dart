@@ -45,7 +45,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           color: kPrimaryColor,
         ),
         child: Text(
-          'Register',
+          'Register or Login',
           style: TextStyle(
             fontSize: 20,
             color: kWhiteColor,

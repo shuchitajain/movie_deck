@@ -24,7 +24,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _movieNameController;
   late TextEditingController _directorNameController;
-  TextEditingController _descriptionController = TextEditingController();
+  //TextEditingController _descriptionController = TextEditingController();
   File? _moviePoster;
   String? _creation;
 

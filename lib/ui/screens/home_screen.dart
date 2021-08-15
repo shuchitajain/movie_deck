@@ -23,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController _searchController = TextEditingController();
   int sortVal = 2;
+  String userName = "User";
 
   Padding movieDetails(String title, String data) {
     return Padding(
@@ -51,9 +52,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void getUserName() async{
+    String? name = await App.fss.read(key: "name");
+    if(name != null){
+      setState(() {
+        userName = name;
+      });
+    }
+    print(userName);
+  }
+
   @override
   void initState() {
     super.initState();
+    getUserName();
   }
 
   @override
@@ -90,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               RichText(
                                 text: TextSpan(
-                                  text: "User! ",
+                                  text: "$userName! ",
                                   style: GoogleFonts.openSans(
                                     fontSize: 17,
                                     color: kPrimaryColor,
@@ -109,14 +121,47 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       InkWell(
                         onTap: () {
-                          var user =
-                              Provider.of<AuthProvider>(context, listen: false);
-                          user.signOut().whenComplete(() =>
-                              Navigator.pushReplacement(
-                                  context,
-                                  PageTransition(
-                                      child: OnboardingScreen(),
-                                      type: PageTransitionType.rightToLeft)));
+                          showDialog(context: context, builder: (_) => AlertDialog(
+                            contentPadding: EdgeInsets.only(top: 30, left: 20, right: 20),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            content: Text("Are you sure you want to log out?", style: TextStyle(color: kBlackColor, fontSize: 18,),),
+                            actions: [
+                              TextButton(
+                                child: Text(
+                                  'Cancel',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              TextButton(
+                                child: Text(
+                                  'Yes',
+                                  style: TextStyle(
+                                    color: kBlackColor,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  var user =
+                                  Provider.of<AuthProvider>(context, listen: false);
+                                  user.signOut().whenComplete(() =>
+                                      Navigator.pushReplacement(
+                                          context,
+                                          PageTransition(
+                                              child: OnboardingScreen(),
+                                              type: PageTransitionType.rightToLeft)));
+                                },
+                              ),
+                            ],
+                          ));
                         },
                         child: Icon(
                           Icons.logout,

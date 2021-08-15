@@ -21,6 +21,7 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController _userNameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   bool _isPassword = true;
@@ -37,7 +38,8 @@ class _SignupScreenState extends State<SignupScreen> {
       required TextEditingController controller,
       obscure,
       isPassword,
-      FormFieldValidator? validate}) {
+      FormFieldValidator? validate,
+      required String hint,}) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 10),
       child: Column(
@@ -62,7 +64,7 @@ class _SignupScreenState extends State<SignupScreen> {
               errorStyle: TextStyle(
                 fontSize: 13.5,
               ),
-              hintText: !isPassword ? "example@gmail.com" : "******",
+              hintText: hint,
               prefixIcon: Icon(
                 icon,
               ),
@@ -153,6 +155,15 @@ class _SignupScreenState extends State<SignupScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       _entryField(
+                        title: "Name",
+                        icon: Icons.person,
+                        controller: _userNameController,
+                        obscure: false,
+                        isPassword: false,
+                        validate: (name) => (name!.isEmpty) ? "Please enter a name" : null,
+                        hint: "John Doe",
+                      ),
+                      _entryField(
                           title: "Email ",
                           icon: Icons.email_outlined,
                           controller: _emailController,
@@ -165,7 +176,9 @@ class _SignupScreenState extends State<SignupScreen> {
                             } else {
                               return "Please enter an email address";
                             }
-                          }),
+                          },
+                        hint: "example@gmail.com",
+                      ),
                       _entryField(
                           title: "Password",
                           icon: Icons.lock,
@@ -173,6 +186,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           obscure: _isPassword,
                           isPassword: true,
                           validate: (pass) => (pass!.isEmpty) ? "Please enter a password" : null,
+                        hint: "*******",
                       ),
                       SizedBox(
                         height: 30,
@@ -189,6 +203,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 .signUpWithEmailAndPassword(
                               email: _emailController.text.trim(),
                               password: _passwordController.text.trim(),
+                              name: _userNameController.text.trim(),
                             ).then((value) async {
                               if(value >= 0) {
                                 switch(value) {
