@@ -1,8 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.movie_deck">
+    <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="movie_deck"
-        android:icon="@mipmap/ic_launcher">
+        android:label="MovieDeck"
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

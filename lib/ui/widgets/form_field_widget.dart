@@ -27,6 +27,7 @@ Widget formFieldWidget({
           obscureText: obscure,
           onTap: () => onTap(),
           keyboardType: keyboard,
+          textCapitalization: TextCapitalization.words,
           maxLines: 1,
           decoration: InputDecoration(
             border: InputBorder.none,

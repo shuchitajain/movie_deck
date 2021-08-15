@@ -131,6 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 50,
                 margin: EdgeInsets.fromLTRB(20, 25, 20, 30),
                 child: TextFormField(
+                  textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(
                     fillColor: Colors.grey[300],
                     focusColor: Colors.grey[300],
