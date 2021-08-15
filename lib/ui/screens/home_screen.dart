@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
+import 'package:movie_deck/models/movie_model.dart';
 import 'package:movie_deck/providers/data_provider.dart';
+import 'package:movie_deck/providers/db_provider.dart';
 import 'package:movie_deck/providers/user_repository.dart';
 import 'package:movie_deck/ui/screens/add_movie_screen.dart';
 import 'package:movie_deck/ui/screens/onboarding_screen.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import '../config.dart';
-import 'package:intl/intl.dart';
 import 'dart:io';
 
 class HomeScreen extends StatefulWidget {
@@ -21,18 +22,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String currentUser = "User";
-  String movieName = "Star Wars";
-  String posterUrl =
-      "https://www.digitalartsonline.co.uk/cmsdata/slideshow/3662115/star-wars-last-jedi-poster.jpg";
-  String directedBy = "NN Kumar";
-  late DateTime createdOn = DateTime.now();
-  late DateTime updatedOn = DateTime.now();
-
   Padding movieDetails(String title, String data) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: RichText(
+        overflow: TextOverflow.ellipsis,
         text: TextSpan(
           text: title + "  ",
           style: GoogleFonts.lato(
@@ -57,7 +51,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final data = Provider.of<DataProvider>(context, listen: false);
     return Scaffold(
       backgroundColor: kWhiteColor,
       resizeToAvoidBottomInset: false,
@@ -90,17 +83,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               RichText(
                                 text: TextSpan(
-                                    text: currentUser + "! ",
-                                    style: GoogleFonts.openSans(
-                                      fontSize: 17,
-                                      color: kPrimaryColor,
-                                      fontWeight: FontWeight.w700,
+                                  text: "User! ",
+                                  style: GoogleFonts.openSans(
+                                    fontSize: 17,
+                                    color: kPrimaryColor,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: "😀",
                                     ),
-                                    children: [
-                                      TextSpan(
-                                        text: "😀",
-                                      ),
-                                    ],
+                                  ],
                                 ),
                               ),
                             ],
@@ -110,12 +103,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       InkWell(
                         onTap: () {
                           var user =
-                          Provider.of<AuthProvider>(context, listen: false);
-                          user
-                              .signOut()
-                              .whenComplete(() =>
-                              Navigator.pushReplacement(context,
-                                  PageTransition(child: OnboardingScreen(),
+                              Provider.of<AuthProvider>(context, listen: false);
+                          user.signOut().whenComplete(() =>
+                              Navigator.pushReplacement(
+                                  context,
+                                  PageTransition(
+                                      child: OnboardingScreen(),
                                       type: PageTransitionType.rightToLeft)));
                         },
                         child: Icon(
@@ -147,6 +140,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
+                  onFieldSubmitted: (val) {
+                    Provider.of<DataProvider>(context).filterItems(val);
+                  },
                 ),
               ),
             ),
@@ -164,10 +160,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    InkWell(
-                      onTap: () {},
-                      child: Icon(
-                        FontAwesomeIcons.sort,
+                    IconButton(
+                      onPressed: () {
+                        Provider.of<DataProvider>(context, listen: false).toggle();
+                      },
+                      icon: Icon(
+                        FontAwesomeIcons.sortAlphaDown,
                         size: 18,
                       ),
                     )
@@ -177,94 +175,126 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ];
         },
-        body: ListView.builder(
-          itemCount: data.items.length,
-          itemBuilder: (_, index) =>
-              Container(
-                height: App.height(context)/3.7,
-                margin: EdgeInsets.symmetric(vertical: 13, horizontal: 20),
-                child: Stack(
-                  children: [
-                    Container(
-                      width: App.width(context) / 2.3,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: kGreyColor,
-                        image: DecorationImage(
-                          image: FileImage(
-                            File(data.items[index].imageUrl)
-                          ),
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: App.width(context) / 2.7,
-                      top: 13,
-                      bottom: 13,
-                      child: Container(
-                        width: App.width(context) / 2,
-                        padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                        decoration: BoxDecoration(
-                          color: kWhiteColor,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              blurRadius: 15,
-                              spreadRadius: 3,
-                              offset: Offset(0, 0.8),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              movieName,
-                              style: GoogleFonts.lato(
-                                fontSize: 19,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            movieDetails("Directed by:", directedBy),
-                            movieDetails("Created on:",
-                                DateFormat('dd-MM-yyyy').format(createdOn)),
-                            movieDetails("Last Updated on:",
-                                DateFormat('dd-MM-yyyy').format(updatedOn)),
-                            Spacer(),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.end,
+        body: FutureBuilder<void>(
+          future: Provider.of<DataProvider>(context, listen: false).fetchAndSetMovie(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else {
+              return Consumer<DataProvider>(
+                child: Center(
+                  child: Text("No movies yet"),
+                ),
+                builder: (ctx, movies, ch) {
+                  if(movies.items.length == 0)
+                    return Center(
+                      child: Text("Press the add button below to add a movie"),
+                    );
+                  else
+                    return ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: movies.items.length,
+                        itemBuilder: (_, index) {
+                          return Container(
+                            height: App.height(context) / 3.7,
+                            margin:
+                            EdgeInsets.symmetric(vertical: 13, horizontal: 20),
+                            child: Stack(
                               children: [
-                                InkWell(
-                                    onTap: () {},
-                                    child: Icon(
-                                      Icons.edit,
-                                      size: 24,
-                                    )),
-                                SizedBox(
-                                  width: 13,
-                                ),
-                                InkWell(
-                                    onTap: () {},
-                                    child: Icon(
-                                      Icons.delete,
-                                      size: 24,
+                                Container(
+                                  width: App.width(context) / 2.3,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: kGreyColor,
+                                    image: DecorationImage(
+                                      image: FileImage(
+                                          File(movies.items[index].imageUrl)),
+                                      fit: BoxFit.cover,
                                     ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: App.width(context) / 2.7,
+                                  top: 13,
+                                  bottom: 13,
+                                  child: Container(
+                                    width: App.width(context) / 2,
+                                    padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                    decoration: BoxDecoration(
+                                      color: kWhiteColor,
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          blurRadius: 15,
+                                          spreadRadius: 3,
+                                          offset: Offset(0, 0.8),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          movies.items[index].name,
+                                          style: GoogleFonts.lato(
+                                            fontSize: 19,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        movieDetails("Directed by:",
+                                            movies.items[index].director),
+                                        movieDetails("Created on:",
+                                            movies.items[index].createdOn),
+                                        movieDetails("Updated on:",
+                                            movies.items[index].updatedOn),
+                                        Spacer(),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                          children: [
+                                            InkWell(
+                                              onTap: () => Navigator.of(context).push(
+                                                PageTransition(child: AddMovieScreen(movie: movies.items[index],), type: PageTransitionType.rightToLeft),
+                                              ),
+                                              child: Icon(
+                                                Icons.edit,
+                                                size: 24,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 13,
+                                            ),
+                                            InkWell(
+                                              onTap: () {
+                                                Provider.of<DataProvider>(context, listen: false).deleteMovie(movies.items[index].name);
+                                                setState(() {});
+                                              },
+                                              child: Icon(
+                                                Icons.delete,
+                                                size: 24,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                          );
+                        });
+                },
+              );
+            }
+          },
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -273,12 +303,11 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 60,
         child: FittedBox(
           child: FloatingActionButton(
-            onPressed: () =>
-                Navigator.of(context).push(
-                  PageTransition(
-                      child: AddMovieScreen(),
-                      type: PageTransitionType.rightToLeft),
-                ),
+            onPressed: () => Navigator.of(context).push(
+              PageTransition(
+                  child: AddMovieScreen(),
+                  type: PageTransitionType.rightToLeft),
+            ),
             elevation: 10,
             backgroundColor: kPrimaryColor,
             child: Icon(

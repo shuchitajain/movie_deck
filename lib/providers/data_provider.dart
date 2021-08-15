@@ -3,69 +3,97 @@ import '../models/movie_model.dart';
 import 'db_provider.dart';
 
 class DataProvider with ChangeNotifier {
-  DbProvider databaseProvider = DbProvider();
   List<Movie> _items = [];
-  final tableName = 'moviesWatched';
+  List<Movie> _filteredItems = [];
+  bool sorted = false;
+  bool filtered = false;
 
-  DataProvider(this._items, this.databaseProvider) {
-    fetchAndSetMovie();
+  void toggle() {
+    sorted = !sorted;
+    print("Sort $sorted");
+    notifyListeners();
   }
 
-  List<Movie> get items => [..._items];
+  List<Movie> get items {
+    if(sorted)
+      return sortedItems;
+    else if(filtered)
+      return _filteredItems;
+    else
+      return [..._items.reversed];
+  }
 
-  void addMovie(String movieName, String directorName, String imagePath) {
-    print("Adding movie to table ${databaseProvider.db}");
-    if (databaseProvider.db != null) {
-      // do not execute if db is not instantiate
+  List<Movie> get sortedItems {
+    var dummyList = _items;
+    dummyList.sort((a, b) => a.name.compareTo(b.name));
+    return [...dummyList];
+  }
+
+  void filterItems(String query) {
+    _items.forEach((element) {
+      if(element.name.contains(query)){
+        _filteredItems.add(element);
+      }
+    });
+  }
+
+  Future<void> addMovie(String movieName, String directorName, String imagePath, String createdAt, String updatedAt) async {
+    print("Adding movie to table $createdAt");
       final newMovie = Movie(
         name: movieName,
         director: directorName,
-        createdOn: DateTime.now().millisecondsSinceEpoch.toString(),
-        updatedOn: DateTime.now().millisecondsSinceEpoch.toString(),
+        createdOn: createdAt,
+        updatedOn: updatedAt,
         imageUrl: imagePath,
       );
-      _items.add(newMovie);
-      print("ITEMS $items");
+      bool isDup = _items.any((element) => element.createdOn == createdAt);
+      if(isDup) {
+        _items.forEach((element) {
+          if(element.createdOn == createdAt){
+            int index = _items.indexOf(element);
+            _items[index] = newMovie;
+          }
+        });
+      } else {
+        _items.add(newMovie);
+      }
       notifyListeners();
-      databaseProvider.createOrUpdate({
+      print("ITEMS $items");
+      DbProvider.createOrUpdate({
         'name': newMovie.name,
         'director': newMovie.director,
-        'image': newMovie.imageUrl,
+        'imageUrl': newMovie.imageUrl,
         'createdOn': newMovie.createdOn,
         'updatedOn': newMovie.updatedOn,
       });
-    }
+      notifyListeners();
   }
 
-  fetchAndSetMovie() async {
-    try {
-      final dataList = await databaseProvider.read();
-      _items = dataList
-          .map((item) => Movie(
-          name: item['name'],
-          director: item['director'],
-          imageUrl: item['image'],
-          createdOn: item['createdOn'],
-          updatedOn: item['updatedOn']))
-          .toList();
-      notifyListeners();
-      print('items $items');
-      print('datalist $dataList');
-    } catch (e) {
-      print(e);
-    }
-    // if (databaseProvider!.db != null) {
-    //   // do not execute if db is not instantiate
-    //   final dataList = await databaseProvider!.read();
-    //   _items = dataList
-    //       .map((item) => Movie(
-    //           name: item['name'],
-    //           director: item['director'],
-    //           imageUrl: item['image'],
-    //           createdOn: item['createdOn'],
-    //           updatedOn: item['updatedOn']))
-    //       .toList();
-    //   notifyListeners();
-    // }
+  Future<void> deleteMovie(String movieName) async {
+    print("Deleting movie from table");
+    items.removeWhere((element) => element.name == movieName);
+    notifyListeners();
+    await DbProvider.delete(movieName);
+  }
+
+  Movie findById(String name) {
+    var ret = _items.firstWhere((element) => element.name == name);
+    notifyListeners();
+    return ret;
+  }
+
+  Future<void> fetchAndSetMovie() async {
+        final dataList = await DbProvider.read();
+        print("Reading data from DbProvider: ${dataList.length} movies");
+        _items = dataList.map((item) =>
+            Movie(
+                name: item['name'].toString(),
+                director: item['director'].toString(),
+                imageUrl: item['imageUrl'].toString(),
+                createdOn: item['createdOn'].toString(),
+                updatedOn: item['updatedOn'].toString(),
+            ),).toList();
+        print("IMAGE: ${_items[0].imageUrl}");
+        notifyListeners();
   }
 }

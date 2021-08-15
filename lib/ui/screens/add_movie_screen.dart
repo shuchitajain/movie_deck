@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
+import 'package:movie_deck/models/movie_model.dart';
 import 'package:movie_deck/providers/data_provider.dart';
 import 'package:movie_deck/ui/config.dart';
 import 'package:movie_deck/ui/widgets/back_button_widget.dart';
@@ -12,7 +13,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class AddMovieScreen extends StatefulWidget {
-  const AddMovieScreen({Key? key}) : super(key: key);
+  final Movie? movie;
+  const AddMovieScreen({Key? key, this.movie}) : super(key: key);
 
   @override
   _AddMovieScreenState createState() => _AddMovieScreenState();
@@ -20,10 +22,30 @@ class AddMovieScreen extends StatefulWidget {
 
 class _AddMovieScreenState extends State<AddMovieScreen> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _movieNameController = TextEditingController();
-  TextEditingController _directorNameController = TextEditingController();
+  late TextEditingController _movieNameController;
+  late TextEditingController _directorNameController;
   TextEditingController _descriptionController = TextEditingController();
   File? _moviePoster;
+  String? _creation;
+
+  Future<void> add({required String name, required String director, required String poster, required String createdAt, required String updatedAt}) async {
+    Movie newMovie = Movie(
+      name: name,
+      director: director,
+      imageUrl: poster,
+      createdOn: createdAt,
+      updatedOn: updatedAt,
+    );
+    print("New Movie poster at ${newMovie.imageUrl}");
+    Provider.of<DataProvider>(context, listen: false).addMovie(
+      newMovie.name,
+      newMovie.director,
+      newMovie.imageUrl,
+      newMovie.createdOn,
+      newMovie.updatedOn,
+    );
+    Navigator.of(context).pop();
+  }
 
   /// Get from gallery
   Future<File?> _getFromGallery() async {
@@ -57,79 +79,81 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
 
   void _showBottomSheetMenu() {
     showModalBottomSheet(
-        context: context,
+      context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20)
-        ),
+            topLeft: Radius.circular(20), topRight: Radius.circular(20)),
       ),
-        builder: (builder) {
-          return Container(
-            height: 200,
-            color: Colors.transparent,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    height: 5,
-                    width: 40,
-                    margin: EdgeInsets.only(top: 10),
-                    decoration: BoxDecoration(
-                      color: kPrimaryColor,
-                      borderRadius: BorderRadius.circular(5)
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                  child: Text(
-                    "Change Movie Poster",
-                    style: GoogleFonts.lato(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: kGreyColor,
-                  thickness: 2,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                  child: InkWell(
-                    onTap: () => _getFromGallery().whenComplete(() => Navigator.pop(context)),
-                    child: Text(
-                      "Choose from gallery",
-                      style: GoogleFonts.lato(
-                        fontSize: 23,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(
+      builder: (builder) {
+        return Container(
+          height: 200,
+          color: Colors.transparent,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
                   height: 5,
+                  width: 40,
+                  margin: EdgeInsets.only(top: 10),
+                  decoration: BoxDecoration(
+                      color: kPrimaryColor,
+                      borderRadius: BorderRadius.circular(5)),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                  child: InkWell(
-                    onTap: () => _getFromCamera().whenComplete(() => Navigator.pop(context)),
-                    child: Text(
-                      "Click from camera",
-                      style: GoogleFonts.lato(
-                        fontSize: 23,
-                      ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                child: Text(
+                  "Change Movie Poster",
+                  style: GoogleFonts.lato(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Divider(
+                color: kGreyColor,
+                thickness: 2,
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                child: InkWell(
+                  onTap: () => _getFromGallery()
+                      .whenComplete(() => Navigator.pop(context)),
+                  child: Text(
+                    "Choose from gallery",
+                    style: GoogleFonts.lato(
+                      fontSize: 23,
                     ),
                   ),
                 ),
-              ],
-            ),
-          );
-        },
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                child: InkWell(
+                  onTap: () => _getFromCamera()
+                      .whenComplete(() => Navigator.pop(context)),
+                  child: Text(
+                    "Click from camera",
+                    style: GoogleFonts.lato(
+                      fontSize: 23,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -148,7 +172,12 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
               SizedBox(
                 width: 10,
               ),
-              Text('Sorry', style: GoogleFonts.lato(fontWeight: FontWeight.bold,),),
+              Text(
+                'Sorry',
+                style: GoogleFonts.lato(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),
@@ -181,6 +210,21 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if(widget.movie != null){
+      _movieNameController = TextEditingController(text: widget.movie!.name);
+      _directorNameController = TextEditingController(text: widget.movie!.director);
+      _moviePoster = File(widget.movie!.imageUrl);
+      _creation = widget.movie!.createdOn;
+      print(_creation);
+    } else {
+      _movieNameController = TextEditingController();
+      _directorNameController = TextEditingController();
+    }
   }
 
   @override
@@ -222,7 +266,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                       //_getFromCamera();
                     },
                     child: Container(
-                      height: App.height(context)/3.7,
+                      height: App.height(context) / 3.7,
                       width: App.width(context) / 2.3,
                       margin: EdgeInsets.symmetric(vertical: 20),
                       decoration: BoxDecoration(
@@ -238,7 +282,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                             )
                           : Image.file(
                               _moviePoster!,
-                              fit: BoxFit.fill,
+                              fit: BoxFit.cover,
                             ),
                     ),
                   ),
@@ -253,8 +297,9 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   formFieldWidget(
                     title: "Director name",
                     controller: _directorNameController,
-                    validator: (value) =>
-                        (value!.isEmpty) ? "Director name can't be empty" : null,
+                    validator: (value) => (value!.isEmpty)
+                        ? "Director name can't be empty"
+                        : null,
                     icon: FontAwesomeIcons.user,
                     onTap: () {},
                   ),
@@ -270,20 +315,32 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                       context: context,
                       text: "Submit",
                       onTap: () async {
-                        if(_moviePoster == null) {
+                        if (_moviePoster == null) {
                           print("no image selected");
                           showErrorDialog();
                         }
                         if (_formKey.currentState!.validate()) {
-                            _formKey.currentState!.save();
-                            print("success");
-                            Provider.of<DataProvider>(context, listen: false).addMovie(
-                              _movieNameController.text.trim(),
-                              _directorNameController.text.trim(),
-                              _moviePoster!.path,
-                            );
-                            final items = Provider.of<DataProvider>(context, listen: false).items;
-                            print(items);
+                          _formKey.currentState!.save();
+                          print("Success");
+                          print("Poster at path: ${_moviePoster!.path}");
+                          add(
+                            name: _movieNameController.text.trim().toString(),
+                            director: _directorNameController.text.trim().toString(),
+                            poster: _moviePoster!.path.toString(),
+                            createdAt: _creation ?? DateTime.now().toString(),
+                            updatedAt: DateTime.now().toString(),
+                          );
+                          // final items = Provider.of<DataProvider>(context, listen: false).items;
+                          // App.fss.write(key: "movies", value: items.toString());
+                          // print(items);
+                          // if (done) {
+                          //   Navigator.of(context).push(
+                          //     PageTransition(
+                          //       child: HomeScreen(),
+                          //       type: PageTransitionType.rightToLeft,
+                          //     ),
+                          //   );
+                          // }
                         }
                       },
                     ),

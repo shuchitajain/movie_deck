@@ -34,6 +34,7 @@ dependencies:
   flutter_secure_storage:
   provider:
   sqflite:
+  path_provider:
   path:
   flutter:
     sdk: flutter

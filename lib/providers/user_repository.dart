@@ -31,7 +31,6 @@ class AuthProvider with ChangeNotifier {
           email: email,
           password: password,
       ).then((auth) => _user = auth.user);
-      print(_user.toString());
       if(user != null) {
         await App.fss.write(key: "uid", value: user!.uid);
         await App.fss.write(key: "email", value: user!.email);
@@ -57,7 +56,6 @@ class AuthProvider with ChangeNotifier {
           email: email,
           password: password,
       ).then((auth) => _user = auth.user);
-      print(_user.toString());
       if(user != null) {
         await App.fss.write(key: "uid", value: user!.uid);
         await App.fss.write(key: "email", value: user!.email);
