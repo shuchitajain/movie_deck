@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:movie_deck/constants.dart';
 import 'package:movie_deck/providers/data_provider.dart';
-import 'package:movie_deck/providers/user_repository.dart';
+import 'package:movie_deck/providers/auth_provider.dart';
 import 'package:movie_deck/ui/screens/add_movie_screen.dart';
 import 'package:movie_deck/ui/screens/onboarding_screen.dart';
 import 'package:page_transition/page_transition.dart';

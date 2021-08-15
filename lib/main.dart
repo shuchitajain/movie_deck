@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/providers/data_provider.dart';
-import 'package:movie_deck/providers/user_repository.dart';
+import 'package:movie_deck/providers/auth_provider.dart';
 import 'package:movie_deck/ui/config.dart';
 import 'package:movie_deck/ui/screens/splash_screen.dart';
 import 'package:provider/provider.dart';

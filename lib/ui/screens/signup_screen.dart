@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:movie_deck/providers/user_repository.dart';
+import 'package:movie_deck/providers/auth_provider.dart';
 import 'package:movie_deck/ui/config.dart';
 import 'package:movie_deck/ui/screens/login_screen.dart';
 import 'package:movie_deck/ui/widgets/app_logo_widget.dart';
@@ -134,7 +134,6 @@ class _SignupScreenState extends State<SignupScreen> {
         key: _formKey,
         child: SingleChildScrollView(
           child: Container(
-            height: App.height(context),
             child: Stack(
               children: <Widget>[
                 Positioned(
@@ -148,7 +147,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: appLogoWidget(context),
                 ),
                 Container(
-                  margin: EdgeInsets.only(top: App.height(context) * 0.25),
+                  margin: EdgeInsets.only(top: App.height(context) * 0.34),
                   padding: EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -177,7 +176,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               return "Please enter an email address";
                             }
                           },
-                        hint: "example@gmail.com",
+                        hint: "johndoe@gmail.com",
                       ),
                       _entryField(
                           title: "Password",
@@ -243,12 +242,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                   },
                                 );
                                 if (success) {
-                                  Navigator.of(context).pushReplacement(
-                                    PageTransition(
-                                      type: PageTransitionType.rightToLeft,
-                                      child: HomeScreen(),
-                                    ),
-                                  );
+                                  Navigator.of(context).pushAndRemoveUntil(PageTransition(
+                                    type: PageTransitionType.rightToLeft,
+                                    child: HomeScreen(),
+                                  ), (route) => false);
                                   _emailController.clear();
                                   _passwordController.clear();
                                 }

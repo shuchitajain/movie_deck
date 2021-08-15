@@ -241,7 +241,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
           child: Form(
             key: _formKey,
             child: Container(
-              height: App.height(context),
               width: App.width(context),
               child: SingleChildScrollView(
                 child: Column(

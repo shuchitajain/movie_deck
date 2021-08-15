@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:movie_deck/constants.dart';
-import 'package:movie_deck/providers/user_repository.dart';
+import 'package:movie_deck/providers/auth_provider.dart';
 import 'package:movie_deck/ui/screens/home_screen.dart';
 import 'package:movie_deck/ui/screens/signup_screen.dart';
 import 'package:movie_deck/ui/widgets/app_logo_widget.dart';
@@ -262,12 +262,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 },
                               );
                               if (success) {
-                                Navigator.of(context).push(
-                                  PageTransition(
-                                    type: PageTransitionType.rightToLeft,
-                                    child: HomeScreen(),
-                                  ),
-                                );
+                                Navigator.of(context).pushAndRemoveUntil(PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: HomeScreen(),
+                                ), (route) => false);
                                 _emailController.clear();
                                 _passwordController.clear();
                               }
@@ -315,12 +313,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                           );
                           if (success) {
-                            Navigator.of(context).pushReplacement(
-                              PageTransition(
-                                type: PageTransitionType.rightToLeft,
-                                child: HomeScreen(),
-                              ),
-                            );
+                            Navigator.of(context).pushAndRemoveUntil(PageTransition(
+                              type: PageTransitionType.rightToLeft,
+                              child: HomeScreen(),
+                            ), (route) => false);
                             _emailController.clear();
                             _passwordController.clear();
                           }

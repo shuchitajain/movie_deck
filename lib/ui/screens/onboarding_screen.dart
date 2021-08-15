@@ -91,7 +91,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          height: App.height(context),
           child: Stack(
             children: [
               Positioned(
@@ -105,7 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: appLogoWidget(context),
               ),
               Container(
-                margin: EdgeInsets.only(top: App.height(context) * .2),
+                margin: EdgeInsets.only(top: App.height(context) * .4),
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
