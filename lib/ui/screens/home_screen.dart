@@ -2,10 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:movie_deck/constants.dart';
-import 'package:movie_deck/models/movie_model.dart';
 import 'package:movie_deck/providers/data_provider.dart';
-import 'package:movie_deck/providers/db_provider.dart';
 import 'package:movie_deck/providers/user_repository.dart';
 import 'package:movie_deck/ui/screens/add_movie_screen.dart';
 import 'package:movie_deck/ui/screens/onboarding_screen.dart';
@@ -22,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
   Padding movieDetails(String title, String data) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
@@ -47,6 +47,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -141,7 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   onFieldSubmitted: (val) {
-                    Provider.of<DataProvider>(context).filterItems(val);
+                    print("searching");
+                    Provider.of<DataProvider>(context, listen: false).filterItems(val);
                   },
                 ),
               ),
@@ -178,6 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: FutureBuilder<void>(
           future: Provider.of<DataProvider>(context, listen: false).fetchAndSetMovie(),
           builder: (context, snapshot) {
+            print(snapshot.hasData);
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                 child: CircularProgressIndicator(),
@@ -190,17 +197,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (ctx, movies, ch) {
                   if(movies.items.length == 0)
                     return Center(
-                      child: Text("Press the add button below to add a movie"),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          "Use the Add Button below to add movies to your watchlist :)",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
                     );
                   else
                     return ListView.builder(
+                      padding: EdgeInsets.symmetric(vertical: 8),
                         physics: NeverScrollableScrollPhysics(),
                         itemCount: movies.items.length,
                         itemBuilder: (_, index) {
                           return Container(
                             height: App.height(context) / 3.7,
-                            margin:
-                            EdgeInsets.symmetric(vertical: 13, horizontal: 20),
+                            margin: EdgeInsets.fromLTRB(20, 0, 20, 18),
                             child: Stack(
                               children: [
                                 Container(
@@ -237,22 +253,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          movies.items[index].name,
-                                          style: GoogleFonts.lato(
-                                            fontSize: 19,
-                                            fontWeight: FontWeight.bold,
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(vertical: 7),
+                                          child: Text(
+                                            movies.items[index].name,
+                                            style: GoogleFonts.lato(
+                                              fontSize: 19,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                        movieDetails("Directed by:",
-                                            movies.items[index].director),
-                                        movieDetails("Created on:",
-                                            movies.items[index].createdOn),
-                                        movieDetails("Updated on:",
-                                            movies.items[index].updatedOn),
+                                        movieDetails("Directed by:", movies.items[index].director),
+                                        movieDetails("Created on:", DateFormat('dd-MM-yyyy').format(DateTime.parse(movies.items[index].createdOn)).toString()),
+                                        movieDetails("Updated on:", DateFormat('dd-MM-yyyy').format(DateTime.parse(movies.items[index].updatedOn)).toString()),
                                         Spacer(),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.end,

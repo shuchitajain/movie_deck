@@ -6,7 +6,7 @@ class DataProvider with ChangeNotifier {
   List<Movie> _items = [];
   List<Movie> _filteredItems = [];
   bool sorted = false;
-  bool filtered = false;
+  String query = "";
 
   void toggle() {
     sorted = !sorted;
@@ -15,12 +15,15 @@ class DataProvider with ChangeNotifier {
   }
 
   List<Movie> get items {
-    if(sorted)
-      return sortedItems;
-    else if(filtered)
-      return _filteredItems;
-    else
-      return [..._items.reversed];
+    if(query == "") {
+      if(sorted)
+        return sortedItems;
+      else
+        return [..._items.reversed];
+    }
+    else {
+      return [..._filteredItems];
+    }
   }
 
   List<Movie> get sortedItems {
@@ -29,12 +32,15 @@ class DataProvider with ChangeNotifier {
     return [...dummyList];
   }
 
-  void filterItems(String query) {
+  filterItems(String newQuery) {
+    _filteredItems = [];
+    query = newQuery;
     _items.forEach((element) {
       if(element.name.contains(query)){
         _filteredItems.add(element);
       }
     });
+    notifyListeners();
   }
 
   Future<void> addMovie(String movieName, String directorName, String imagePath, String createdAt, String updatedAt) async {

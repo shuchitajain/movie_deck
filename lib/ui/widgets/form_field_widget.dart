@@ -27,7 +27,7 @@ Widget formFieldWidget({
           obscureText: obscure,
           onTap: () => onTap(),
           keyboardType: keyboard,
-          maxLines: title.contains("Description") ? 4 : 1,
+          maxLines: 1,
           decoration: InputDecoration(
             border: InputBorder.none,
             fillColor: Color(0xfff3f3f4),

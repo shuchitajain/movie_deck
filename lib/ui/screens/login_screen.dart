@@ -60,6 +60,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 !isPassword ? TextInputType.emailAddress : TextInputType.text,
             decoration: InputDecoration(
               border: InputBorder.none,
+              errorStyle: TextStyle(
+                fontSize: 13.5,
+              ),
               hintText: !isPassword ? "example@gmail.com" : "******",
               prefixIcon: Icon(
                 icon,
@@ -313,7 +316,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                           );
                           if (success) {
-                            Navigator.of(context).push(
+                            Navigator.of(context).pushReplacement(
                               PageTransition(
                                 type: PageTransitionType.rightToLeft,
                                 child: HomeScreen(),

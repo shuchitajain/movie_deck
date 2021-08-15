@@ -128,7 +128,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   child: Text(
                     "Choose from gallery",
                     style: GoogleFonts.lato(
-                      fontSize: 23,
+                      fontSize: 20,
                     ),
                   ),
                 ),
@@ -145,7 +145,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   child: Text(
                     "Click from camera",
                     style: GoogleFonts.lato(
-                      fontSize: 23,
+                      fontSize: 20,
                     ),
                   ),
                 ),
@@ -303,12 +303,12 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                     icon: FontAwesomeIcons.user,
                     onTap: () {},
                   ),
-                  formFieldWidget(
-                    title: "Description (Optional)",
-                    controller: _descriptionController,
-                    icon: FontAwesomeIcons.fileAlt,
-                    onTap: () {},
-                  ),
+                  // formFieldWidget(
+                  //   title: "Description (Optional)",
+                  //   controller: _descriptionController,
+                  //   icon: FontAwesomeIcons.fileAlt,
+                  //   onTap: () {},
+                  // ),
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: submitButton(
@@ -330,17 +330,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                             createdAt: _creation ?? DateTime.now().toString(),
                             updatedAt: DateTime.now().toString(),
                           );
-                          // final items = Provider.of<DataProvider>(context, listen: false).items;
-                          // App.fss.write(key: "movies", value: items.toString());
-                          // print(items);
-                          // if (done) {
-                          //   Navigator.of(context).push(
-                          //     PageTransition(
-                          //       child: HomeScreen(),
-                          //       type: PageTransitionType.rightToLeft,
-                          //     ),
-                          //   );
-                          // }
                         }
                       },
                     ),
