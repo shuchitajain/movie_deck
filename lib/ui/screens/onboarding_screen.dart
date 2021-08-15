@@ -19,7 +19,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _registerButton() {
     return InkWell(
       onTap: () {
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           PageTransition(
             type: PageTransitionType.rightToLeft,

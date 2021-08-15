@@ -90,7 +90,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget _loginLabel() {
     return InkWell(
       onTap: () {
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           PageTransition(
             type: PageTransitionType.rightToLeft,

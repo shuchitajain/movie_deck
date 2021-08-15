@@ -10,7 +10,6 @@ import 'package:movie_deck/ui/widgets/bezier_container_widget.dart';
 import 'package:movie_deck/ui/widgets/reusable_button_widget.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-
 import '../config.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -124,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _createAccount() {
     return InkWell(
       onTap: () {
-        Navigator.pushReplacement(
+        Navigator.push(
             context, MaterialPageRoute(builder: (context) => SignupScreen()));
       },
       child: Container(

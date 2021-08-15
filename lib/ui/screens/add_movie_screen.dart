@@ -44,6 +44,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
       newMovie.createdOn,
       newMovie.updatedOn,
     );
+    Provider.of<DataProvider>(context, listen: false).filterItems("");
     Navigator.of(context).pop();
   }
 
@@ -229,112 +230,119 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Container(
-            height: App.height(context),
-            width: App.width(context),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: Row(
-                      children: [
-                        backButton(context),
-                        Spacer(
-                          flex: 1,
-                        ),
-                        Text(
-                          "Add a movie",
-                          style: GoogleFonts.ubuntu(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
+    return WillPopScope(
+      onWillPop: () async{
+        await Future.delayed(Duration.zero, () => Provider.of<DataProvider>(context, listen: false).filterItems(""));
+        print(Provider.of<DataProvider>(context, listen: false).isSorted);
+        return true;
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: Container(
+              height: App.height(context),
+              width: App.width(context),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        children: [
+                          backButton(context),
+                          Spacer(
+                            flex: 1,
                           ),
-                        ),
-                        Spacer(
-                          flex: 2,
-                        ),
-                      ],
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {
-                      _showBottomSheetMenu();
-                      //_getFromCamera();
-                    },
-                    child: Container(
-                      height: App.height(context) / 3.7,
-                      width: App.width(context) / 2.3,
-                      margin: EdgeInsets.symmetric(vertical: 20),
-                      decoration: BoxDecoration(
-                          color: Colors.grey[350],
-                          borderRadius: BorderRadius.circular(10)),
-                      child: _moviePoster == null
-                          ? Center(
-                              child: Icon(
-                                FontAwesomeIcons.camera,
-                                size: 36,
-                                color: kBlackColor,
-                              ),
-                            )
-                          : Image.file(
-                              _moviePoster!,
-                              fit: BoxFit.cover,
+                          Text(
+                            "Add a movie",
+                            style: GoogleFonts.ubuntu(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
                             ),
+                          ),
+                          Spacer(
+                            flex: 2,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  formFieldWidget(
-                    title: "Movie name",
-                    controller: _movieNameController,
-                    validator: (value) =>
-                        (value!.isEmpty) ? "Movie name can't be empty" : null,
-                    icon: FontAwesomeIcons.film,
-                    onTap: () {},
-                  ),
-                  formFieldWidget(
-                    title: "Director name",
-                    controller: _directorNameController,
-                    validator: (value) => (value!.isEmpty)
-                        ? "Director name can't be empty"
-                        : null,
-                    icon: FontAwesomeIcons.user,
-                    onTap: () {},
-                  ),
-                  // formFieldWidget(
-                  //   title: "Description (Optional)",
-                  //   controller: _descriptionController,
-                  //   icon: FontAwesomeIcons.fileAlt,
-                  //   onTap: () {},
-                  // ),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: submitButton(
-                      context: context,
-                      text: "Submit",
-                      onTap: () async {
-                        if (_moviePoster == null) {
-                          print("no image selected");
-                          showErrorDialog();
-                        }
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                          print("Success");
-                          print("Poster at path: ${_moviePoster!.path}");
-                          add(
-                            name: _movieNameController.text.trim().toString(),
-                            director: _directorNameController.text.trim().toString(),
-                            poster: _moviePoster!.path.toString(),
-                            createdAt: _creation ?? DateTime.now().toString(),
-                            updatedAt: DateTime.now().toString(),
-                          );
-                        }
+                    InkWell(
+                      onTap: () {
+                        _showBottomSheetMenu();
+                        //_getFromCamera();
                       },
+                      child: Container(
+                        height: App.height(context) / 3.7,
+                        width: App.width(context) / 2.3,
+                        margin: EdgeInsets.symmetric(vertical: 20),
+                        decoration: BoxDecoration(
+                            color: Colors.grey[350],
+                            borderRadius: BorderRadius.circular(10)),
+                        child: _moviePoster == null
+                            ? Center(
+                                child: Icon(
+                                  FontAwesomeIcons.camera,
+                                  size: 36,
+                                  color: kBlackColor,
+                                ),
+                              )
+                            : Image.file(
+                                _moviePoster!,
+                                fit: BoxFit.cover,
+                              ),
+                      ),
                     ),
-                  ),
-                ],
+                    formFieldWidget(
+                      title: "Movie name",
+                      controller: _movieNameController,
+                      validator: (value) =>
+                          (value!.isEmpty) ? "Movie name can't be empty" : null,
+                      icon: FontAwesomeIcons.film,
+                      onTap: () {},
+                    ),
+                    formFieldWidget(
+                      title: "Director name",
+                      controller: _directorNameController,
+                      validator: (value) => (value!.isEmpty)
+                          ? "Director name can't be empty"
+                          : null,
+                      icon: FontAwesomeIcons.user,
+                      onTap: () {},
+                    ),
+                    // formFieldWidget(
+                    //   title: "Description (Optional)",
+                    //   controller: _descriptionController,
+                    //   icon: FontAwesomeIcons.fileAlt,
+                    //   onTap: () {},
+                    // ),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: submitButton(
+                        context: context,
+                        text: "Submit",
+                        onTap: () async {
+                          if (_moviePoster == null) {
+                            print("no image selected");
+                            showErrorDialog();
+                          }
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            print("Success");
+                            print("Poster at path: ${_moviePoster!.path}");
+                            add(
+                              name: _movieNameController.text.trim().toString(),
+                              director: _directorNameController.text.trim().toString(),
+                              poster: _moviePoster!.path.toString(),
+                              createdAt: _creation ?? DateTime.now().toString(),
+                              updatedAt: DateTime.now().toString(),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

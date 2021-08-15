@@ -5,31 +5,63 @@ import 'db_provider.dart';
 class DataProvider with ChangeNotifier {
   List<Movie> _items = [];
   List<Movie> _filteredItems = [];
-  bool sorted = false;
+  int sorted = 2;
   String query = "";
 
-  void toggle() {
-    sorted = !sorted;
+  void toggle(int newSort) {
+    sorted = newSort;
     print("Sort $sorted");
     notifyListeners();
   }
 
+  int get isSorted => sorted;
+
   List<Movie> get items {
-    if(query == "") {
-      if(sorted)
-        return sortedItems;
+    List<Movie> dummyList = _items;
+    if(query != ""){
+      dummyList = [..._filteredItems];
+      if(sorted >= 0){
+        dummyList = sortItems(dummyList);
+      } else {
+        dummyList = [..._items.reversed];
+      }
+    }
+    else if(query == ""){
+      if(sorted >= 0)
+        dummyList = sortItems(dummyList);
       else
-        return [..._items.reversed];
+        dummyList = [..._items.reversed];
     }
-    else {
-      return [..._filteredItems];
-    }
+    return dummyList;
+    // if(query == "") {
+    //   if(sorted)
+    //     return sortedItems;
+    //   else
+    //     return [..._items.reversed];
+    // }
+    // else {
+    //   return [..._filteredItems];
+    // }
   }
 
-  List<Movie> get sortedItems {
-    var dummyList = _items;
-    dummyList.sort((a, b) => a.name.compareTo(b.name));
-    return [...dummyList];
+  // List<Movie> get sortedItems {
+  //   var dummyList = _items;
+  //   dummyList.sort((a, b) => a.name.compareTo(b.name));
+  //   return [...dummyList];
+  // }
+
+  sortItems(List<Movie> currList) {
+    List<Movie> dummyList = currList;
+    if(sorted == 0){
+      dummyList.sort((a, b) => a.name.compareTo(b.name));
+    }
+    if(sorted == 1){
+      dummyList.sort((b, a) => a.name.compareTo(b.name));
+    }
+    if(sorted == 2){
+      dummyList = [...currList.reversed];
+    }
+    return dummyList;
   }
 
   filterItems(String newQuery) {

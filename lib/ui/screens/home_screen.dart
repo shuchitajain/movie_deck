@@ -21,6 +21,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  TextEditingController _searchController = TextEditingController();
+  int sortVal = 2;
 
   Padding movieDetails(String title, String data) {
     return Padding(
@@ -132,6 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 margin: EdgeInsets.fromLTRB(20, 25, 20, 30),
                 child: TextFormField(
                   textCapitalization: TextCapitalization.words,
+                  controller: _searchController,
                   decoration: InputDecoration(
                     fillColor: Colors.grey[300],
                     focusColor: Colors.grey[300],
@@ -141,6 +144,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     prefixIcon: Icon(
                       FontAwesomeIcons.search,
                       size: 18,
+                    ),
+                    suffix: Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: InkWell(
+                        child: Icon(
+                          FontAwesomeIcons.times,
+                          size: 18,
+                          color: kGreyColor,
+                        ),
+                        onTap: () {
+                          _searchController.clear();
+                          FocusScope.of(context).unfocus();
+                        },
+                      ),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(28),
@@ -167,15 +184,65 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    IconButton(
-                      onPressed: () {
-                        Provider.of<DataProvider>(context, listen: false).toggle();
-                      },
-                      icon: Icon(
-                        FontAwesomeIcons.sortAlphaDown,
-                        size: 18,
+                    // IconButton(
+                    //   onPressed: () {
+                    //     Provider.of<DataProvider>(context, listen: false)
+                    //         .toggle();
+                    //   },
+                    //   icon: Icon(
+                    //     Provider.of<DataProvider>(context, listen: false)
+                    //             .isSorted
+                    //         ? FontAwesomeIcons.sortAlphaUp
+                    //         : FontAwesomeIcons.sortAlphaDown,
+                    //     size: 18,
+                    //   ),
+                    // )
+                    Container(
+                      height: 50,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<int>(
+                          icon: Visibility(
+                              visible: false,
+                              child: Icon(Icons.arrow_downward)),
+                          style: TextStyle(fontSize: 14, color: kBlackColor),
+                          value: sortVal,
+                          onChanged: (val) {
+                            setState(() {
+                              sortVal = val!;
+                            });
+                          },
+                          items: [
+                            DropdownMenuItem(
+                              child: Text("Sort A-Z"),
+                              value: 0,
+                              onTap: () {
+                                Provider.of<DataProvider>(context,
+                                        listen: false)
+                                    .toggle(0);
+                              },
+                            ),
+                            DropdownMenuItem(
+                              child: Text("Sort Z-A"),
+                              value: 1,
+                              onTap: () {
+                                Provider.of<DataProvider>(context,
+                                        listen: false)
+                                    .toggle(1);
+                              },
+                            ),
+                            DropdownMenuItem(
+                              child: Text("Last Added"),
+                              value: 2,
+                              onTap: () {
+                                Provider.of<DataProvider>(context,
+                                        listen: false)
+                                    .toggle(2);
+                              },
+                            )
+                          ],
+                        ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -183,7 +250,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ];
         },
         body: FutureBuilder<void>(
-          future: Provider.of<DataProvider>(context, listen: false).fetchAndSetMovie(),
+          future: Provider.of<DataProvider>(context, listen: false)
+              .fetchAndSetMovie(),
           builder: (context, snapshot) {
             print(snapshot.hasData);
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -196,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text("No movies yet"),
                 ),
                 builder: (ctx, movies, ch) {
-                  if(movies.items.length == 0)
+                  if (movies.items.length == 0)
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.all(10),
@@ -211,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   else
                     return ListView.builder(
-                      padding: EdgeInsets.symmetric(vertical: 8),
+                        padding: EdgeInsets.symmetric(vertical: 8),
                         physics: NeverScrollableScrollPhysics(),
                         itemCount: movies.items.length,
                         itemBuilder: (_, index) {
@@ -238,7 +306,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   bottom: 13,
                                   child: Container(
                                     width: App.width(context) / 2,
-                                    padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                    padding:
+                                        EdgeInsets.fromLTRB(20, 10, 20, 10),
                                     decoration: BoxDecoration(
                                       color: kWhiteColor,
                                       borderRadius: BorderRadius.circular(8),
@@ -252,12 +321,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ],
                                     ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 7),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8),
                                           child: Text(
                                             movies.items[index].name,
+                                            maxLines: 2,
                                             style: GoogleFonts.lato(
                                               fontSize: 19,
                                               fontWeight: FontWeight.bold,
@@ -265,18 +337,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        movieDetails("Directed by:", movies.items[index].director),
-                                        movieDetails("Created on:", DateFormat('dd-MM-yyyy').format(DateTime.parse(movies.items[index].createdOn)).toString()),
-                                        movieDetails("Updated on:", DateFormat('dd-MM-yyyy').format(DateTime.parse(movies.items[index].updatedOn)).toString()),
+                                        movieDetails("Directed by:",
+                                            movies.items[index].director),
+                                        movieDetails(
+                                            "Added on:",
+                                            DateFormat('dd-MM-yyyy')
+                                                .format(DateTime.parse(movies
+                                                    .items[index].createdOn))
+                                                .toString()),
+                                        //movieDetails("Updated on:", DateFormat('dd-MM-yyyy').format(DateTime.parse(movies.items[index].updatedOn)).toString()),
                                         Spacer(),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.end,
+                                              CrossAxisAlignment.end,
                                           children: [
                                             InkWell(
-                                              onTap: () => Navigator.of(context).push(
-                                                PageTransition(child: AddMovieScreen(movie: movies.items[index],), type: PageTransitionType.rightToLeft),
+                                              onTap: () =>
+                                                  Navigator.of(context).push(
+                                                PageTransition(
+                                                    child: AddMovieScreen(
+                                                      movie:
+                                                          movies.items[index],
+                                                    ),
+                                                    type: PageTransitionType
+                                                        .rightToLeft),
                                               ),
                                               child: Icon(
                                                 Icons.edit,
@@ -288,7 +374,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                             InkWell(
                                               onTap: () {
-                                                Provider.of<DataProvider>(context, listen: false).deleteMovie(movies.items[index].name);
+                                                Provider.of<DataProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .deleteMovie(movies
+                                                        .items[index].name);
                                                 setState(() {});
                                               },
                                               child: Icon(
@@ -318,11 +408,15 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 60,
         child: FittedBox(
           child: FloatingActionButton(
-            onPressed: () => Navigator.of(context).push(
-              PageTransition(
+            onPressed: () {
+              _searchController.clear();
+              Navigator.of(context).push(
+                PageTransition(
                   child: AddMovieScreen(),
-                  type: PageTransitionType.rightToLeft),
-            ),
+                  type: PageTransitionType.rightToLeft,
+                ),
+              );
+            },
             elevation: 10,
             backgroundColor: kPrimaryColor,
             child: Icon(
@@ -333,5 +427,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _searchController.dispose();
   }
 }
