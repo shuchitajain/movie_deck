@@ -3,7 +3,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
 
-class DbHelper{
+class DbProvider{
   static const tableName = 'moviesWatched';
 
   static Future<Database> initDatabase() async {
@@ -26,19 +26,19 @@ class DbHelper{
   }
 
   static Future<List<Map<String, dynamic>>> read() async {
-    final _db = await DbHelper.initDatabase();
+    final _db = await DbProvider.initDatabase();
     return await _db.query(tableName);
   }
 
   static Future<List<Map<String, dynamic>>> find(String name) async {
-    final _db = await DbHelper.initDatabase();
+    final _db = await DbProvider.initDatabase();
     final ret = await _db.query(tableName, where: 'name = name');
     return ret;
   }
 
   static Future<void> createOrUpdate(Map<String, dynamic> data) async {
     print("DB Poster ${data["imageUrl"]}");
-    final _db = await DbHelper.initDatabase();
+    final _db = await DbProvider.initDatabase();
     await _db.insert(tableName, data, conflictAlgorithm: ConflictAlgorithm.replace,);
     (await _db.query(tableName, columns: ['createdOn', 'name'])).forEach((row) {
       print(row.values);
@@ -46,7 +46,7 @@ class DbHelper{
   }
 
   static Future<void> delete(String key) async {
-    final _db = await DbHelper.initDatabase();
+    final _db = await DbProvider.initDatabase();
     await _db.delete(
       tableName,
       where: 'name = ?',
@@ -55,7 +55,7 @@ class DbHelper{
   }
 
   static Future clearTable() async {
-    final _db = await DbHelper.initDatabase();
+    final _db = await DbProvider.initDatabase();
     return await _db.rawQuery("DELETE FROM $tableName");
   }
 }

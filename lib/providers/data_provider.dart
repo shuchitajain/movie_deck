@@ -1,30 +1,33 @@
 import 'package:flutter/foundation.dart';
-import 'package:movie_deck/repositories/firestore_helper.dart';
 import '../models/movie_model.dart';
-import '../repositories/db_helper.dart';
+import 'db_provider.dart';
 
 class DataProvider with ChangeNotifier {
   List<Movie> _items = [];
   List<Movie> _filteredItems = [];
-  List<Movie> _cloudItems = [];
-  int _sorted = 2;
-  String _query = "";
-  bool _fetch = true;
+  int sorted = 2;
+  String query = "";
 
-  int get isSorted => _sorted;
-  bool get isFetching => _fetch;
+  void toggle(int newSort) {
+    sorted = newSort;
+    print("Sort $sorted");
+    notifyListeners();
+  }
+
+  int get isSorted => sorted;
+
   List<Movie> get items {
     List<Movie> dummyList = _items;
-    if(_query != ""){
+    if(query != ""){
       dummyList = [..._filteredItems];
-      if(_sorted >= 0){
+      if(sorted >= 0){
         dummyList = sortItems(dummyList);
       } else {
         dummyList = [..._items.reversed];
       }
     }
-    else if(_query == ""){
-      if(_sorted >= 0)
+    else if(query == ""){
+      if(sorted >= 0)
         dummyList = sortItems(dummyList);
       else
         dummyList = [..._items.reversed];
@@ -41,31 +44,21 @@ class DataProvider with ChangeNotifier {
     // }
   }
 
-  void toggle(int newSort) {
-    _sorted = newSort;
-    print("Sort $_sorted");
-    notifyListeners();
-  }
-
-  void toggleFetch(bool shouldFetch){
-    _fetch = shouldFetch;
-    notifyListeners();
-  }
-
-  void setCloudItems(List<Movie> cloudList) {
-    _cloudItems = cloudList;
-    notifyListeners();
-  }
+  // List<Movie> get sortedItems {
+  //   var dummyList = _items;
+  //   dummyList.sort((a, b) => a.name.compareTo(b.name));
+  //   return [...dummyList];
+  // }
 
   sortItems(List<Movie> currList) {
     List<Movie> dummyList = currList;
-    if(_sorted == 0){
+    if(sorted == 0){
       dummyList.sort((a, b) => a.name.compareTo(b.name));
     }
-    if(_sorted == 1){
+    if(sorted == 1){
       dummyList.sort((b, a) => a.name.compareTo(b.name));
     }
-    if(_sorted == 2){
+    if(sorted == 2){
       dummyList = [...currList.reversed];
     }
     return dummyList;
@@ -73,9 +66,9 @@ class DataProvider with ChangeNotifier {
 
   filterItems(String newQuery) {
     _filteredItems = [];
-    _query = newQuery;
+    query = newQuery;
     _items.forEach((element) {
-      if(element.name.contains(_query)){
+      if(element.name.contains(query)){
         _filteredItems.add(element);
       }
     });
@@ -104,7 +97,7 @@ class DataProvider with ChangeNotifier {
       }
       notifyListeners();
       print("ITEMS $items");
-      DbHelper.createOrUpdate({
+      DbProvider.createOrUpdate({
         'name': newMovie.name,
         'director': newMovie.director,
         'imageUrl': newMovie.imageUrl,
@@ -118,28 +111,27 @@ class DataProvider with ChangeNotifier {
     print("Deleting movie from table");
     items.removeWhere((element) => element.name == movieName);
     notifyListeners();
-    await DbHelper.delete(movieName);
+    await DbProvider.delete(movieName);
+  }
+
+  Movie findById(String name) {
+    var ret = _items.firstWhere((element) => element.name == name);
+    notifyListeners();
+    return ret;
   }
 
   Future<void> fetchAndSetMovie() async {
-        print('DP: ${_cloudItems.length} $_fetch');
-        if(_cloudItems.length > 0 && _fetch) {
-          _cloudItems.forEach((element) {
-            DbHelper.createOrUpdate(element.toMap());
-          });
-          print("fetching");
-        }
-        final dataList = await DbHelper.read();
+        final dataList = await DbProvider.read();
         print("Reading data from DbProvider: ${dataList.length} movies");
         _items = dataList.map((item) =>
             Movie(
-              name: item['name'].toString(),
-              director: item['director'].toString(),
-              imageUrl: item['imageUrl'].toString(),
-              createdOn: item['createdOn'].toString(),
-              updatedOn: item['updatedOn'].toString(),
+                name: item['name'].toString(),
+                director: item['director'].toString(),
+                imageUrl: item['imageUrl'].toString(),
+                createdOn: item['createdOn'].toString(),
+                updatedOn: item['updatedOn'].toString(),
             ),).toList();
-        toggleFetch(false);
+        print("IMAGE: ${_items[0].imageUrl}");
         notifyListeners();
   }
 }
