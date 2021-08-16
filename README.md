@@ -1,7 +1,7 @@
 # movie_deck
 
 A Flutter app to add movies you've watched to your watchlst. 
-Branch main has the app version built using sqflite(local db) and firebase authentication with google signin and prvider for state management.
+Branch main has the app version built using sqflite(local db) and firebase authentication with google signin and provider for state management.
 Whereas Branch cloudfunc has an addirional functionality of firestore to save data on the cloud as well, so that watchlist data can be unique per user account.
 Please feel free to explore both branches.
 
