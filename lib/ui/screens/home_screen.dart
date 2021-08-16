@@ -67,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future saveWatchlistToFirestore() async {
+    print("${Provider.of<DataProvider>(context, listen: false).isLoggingOut}");
     print("UserName ${FirebaseAuth.instance.currentUser!.displayName} UserId ${FirebaseAuth.instance.currentUser!.uid}");
     print("Watchlist ${Provider.of<DataProvider>(context, listen: false).items}");
     try {
@@ -106,6 +107,34 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     Provider.of<DataProvider>(context, listen: false).setCloudItems(dataFromFirestore);
     //FirestoreHelper.toggleFetching(docId: FirebaseAuth.instance.currentUser!.uid, fetchOrNot: false);
+  }
+
+  void loggingOutDialog(){
+    showDialog(context: context, builder: (_) {
+      saveWatchlistToFirestore().whenComplete(() {
+        Navigator.pop(context);
+        var userAuth = Provider.of<AuthProvider>(context, listen: false);
+        userAuth.signOut().whenComplete(() {
+          Navigator.pushReplacement(
+            context,
+            PageTransition(
+              child: OnboardingScreen(),
+              type: PageTransitionType
+                  .rightToLeft,
+            ),
+          );
+        }
+        );
+      });
+      return AlertDialog(
+        content: Container(
+          height: 60,
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    });
   }
 
   // Future saveWatchlistToFirestore() async {
@@ -260,19 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         onPressed: () async {
                                           Navigator.of(context).pop();
                                           ///saving data to cloud to map it to diff users
-                                          await saveWatchlistToFirestore().whenComplete(() {
-                                            var userAuth = Provider.of<AuthProvider>(context, listen: false);
-                                            userAuth.signOut().whenComplete(
-                                                  () => Navigator.pushReplacement(
-                                                context,
-                                                PageTransition(
-                                                  child: OnboardingScreen(),
-                                                  type: PageTransitionType
-                                                      .rightToLeft,
-                                                ),
-                                              ),
-                                            );
-                                          });
+                                          loggingOutDialog();
                                         },
                                       ),
                                     ],
@@ -526,8 +543,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         context,
                                                         listen: false)
                                                     .deleteMovie(movies
-                                                        .items[index].name);
-                                                await FirestoreHelper.deleteMovie(movie: [movies.items[index].toMap()], docId: FirebaseAuth.instance.currentUser!.uid);
+                                                        .items[index].name).whenComplete(() => FirestoreHelper.deleteMovie(movie: [movies.items[index].toMap()], docId: FirebaseAuth.instance.currentUser!.uid));
                                                 setState(() {});
                                               },
                                               child: Icon(

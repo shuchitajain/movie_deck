@@ -11,10 +11,10 @@ class DataProvider with ChangeNotifier {
   List<Movie> _cloudItems = [];
   int _sorted = 2;
   String _query = "";
-  bool _fetch = true;
+  bool _logout = false;
 
   int get isSorted => _sorted;
-  bool get isFetching => _fetch;
+  bool get isLoggingOut => _logout;
   List<Movie> get items {
     List<Movie> dummyList = _items;
     if(_query != ""){
@@ -49,8 +49,8 @@ class DataProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleFetch(bool shouldFetch){
-    _fetch = shouldFetch;
+  Future<void> toggleLogout(bool logout)async {
+    _logout = logout;
     notifyListeners();
   }
 
@@ -114,6 +114,7 @@ class DataProvider with ChangeNotifier {
         'updatedOn': newMovie.updatedOn,
       });
       notifyListeners();
+    FirestoreHelper.toggleFetching(docId: FirebaseAuth.instance.currentUser!.uid, fetchOrNot: false);
   }
 
   Future<void> deleteMovie(String movieName) async {
@@ -121,6 +122,7 @@ class DataProvider with ChangeNotifier {
     items.removeWhere((element) => element.name == movieName);
     notifyListeners();
     await DbHelper.delete(movieName);
+    FirestoreHelper.toggleFetching(docId: FirebaseAuth.instance.currentUser!.uid, fetchOrNot: false);
   }
 
   Future<void> fetchAndSetMovie() async {
@@ -145,7 +147,6 @@ class DataProvider with ChangeNotifier {
               createdOn: item['createdOn'].toString(),
               updatedOn: item['updatedOn'].toString(),
             ),).toList();
-        //FirestoreHelper.toggleFetching(docId: FirebaseAuth.instance.currentUser!.uid, fetchOrNot: false);
         //toggleFetch(false);
         notifyListeners();
   }

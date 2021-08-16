@@ -92,6 +92,7 @@ class AuthProvider with ChangeNotifier {
         await FirebaseFirestore.instance.doc(_user!.uid).get().then((doc) {
           exist = doc.exists;
         });
+        ///User is signing up with google
         if(!exist) {
           await FirestoreHelper.addUserToCloud(); ///NEW
         }
