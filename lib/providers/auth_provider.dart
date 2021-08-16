@@ -86,16 +86,15 @@ class AuthProvider with ChangeNotifier {
       );
 
       await _auth.signInWithCredential(credential).then((auth) => _user = auth.user);
-      print("Google user $_user");
+      print("Google user $_user with id ${_user!.uid}");
       if(user != null) {
-        late bool exist;
-        await FirebaseFirestore.instance.doc(_user!.uid).get().then((doc) {
-          exist = doc.exists;
-        });
+        var collectionRef = FirebaseFirestore.instance.collection('users');
+        DocumentSnapshot doc = await collectionRef.doc(_user!.uid).get();
         ///User is signing up with google
-        if(!exist) {
+        if(doc.data() == null) {
           await FirestoreHelper.addUserToCloud(); ///NEW
         }
+        print("GUser exists $doc");
         await App.fss.write(key: "uid", value: user!.uid);
         await App.fss.write(key: "email", value: user!.email);
         await App.fss.write(key: "name", value: user!.displayName);
