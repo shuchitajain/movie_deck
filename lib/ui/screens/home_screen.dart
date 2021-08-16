@@ -200,6 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         onTap: () {
                           _searchController.clear();
+                          Provider.of<DataProvider>(context, listen: false).filterItems("");
                           FocusScope.of(context).unfocus();
                         },
                       ),
@@ -208,9 +209,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
-                  onFieldSubmitted: (val) {
+                  onChanged: (val) {
                     print("searching");
-                    Provider.of<DataProvider>(context, listen: false).filterItems(val);
+                    if(val.length >= 3)
+                      Provider.of<DataProvider>(context, listen: false).filterItems(val);
                   },
                 ),
               ),
