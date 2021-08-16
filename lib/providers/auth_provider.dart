@@ -1,12 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:movie_deck/providers/data_provider.dart';
-import 'package:movie_deck/repositories/db_helper.dart';
 import 'package:movie_deck/ui/config.dart';
-import 'package:provider/provider.dart';
 
 class AuthProvider with ChangeNotifier {
   late final FirebaseAuth _auth;
@@ -99,10 +95,9 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-    Future signOut() async {
+  Future signOut() async {
     _auth.signOut();
     await App.fss.deleteAll();
-    DbHelper.clearTable();
     return Future.delayed(Duration.zero);
   }
 }
