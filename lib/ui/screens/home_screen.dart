@@ -9,6 +9,7 @@ import 'package:movie_deck/constants.dart';
 import 'package:movie_deck/models/movie_model.dart';
 import 'package:movie_deck/providers/data_provider.dart';
 import 'package:movie_deck/providers/auth_provider.dart';
+import 'package:movie_deck/repositories/firestore_helper.dart';
 import 'package:movie_deck/ui/screens/add_movie_screen.dart';
 import 'package:movie_deck/ui/screens/onboarding_screen.dart';
 import 'package:page_transition/page_transition.dart';
@@ -55,9 +56,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void getUserName() async{
+  void getUserName() async {
     String? name = await App.fss.read(key: "name");
-    if(name != null){
+    if (name != null) {
       setState(() {
         userName = name;
       });
@@ -65,23 +66,37 @@ class _HomeScreenState extends State<HomeScreen> {
     print(userName);
   }
 
-  Future saveWatchlistToFirestore(User? fUser) async {
-    //Creating a collection named 'users' with new document for each user using a unique 'uid'
-    if(Provider.of<DataProvider>(context, listen: false).items.length > 0){
-      List<Map<String, dynamic>> fData = [];
-      Provider.of<DataProvider>(context, listen: false).items.forEach((element) {
-        fData.add(element.toMap());
-      });
-      FirebaseFirestore.instance.collection('users').doc(fUser!.uid).set({'watchlist' : fData,}, SetOptions(merge: true)).then((value) => print("done"));
+  Future saveWatchlistToFirestore() async {
+    print("Saving user watchlist");
+    try {
+      if (Provider.of<DataProvider>(context, listen: false).items.length > 0) {
+        List<Map<String, dynamic>> fData = [];
+        Provider.of<DataProvider>(context, listen: false)
+            .items
+            .forEach((element) {
+          fData.add(element.toMap());
+        });
+        await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).set({
+          'watchlist': fData,
+        }, SetOptions(merge: true)).then((value) => print("done"));
+      }
+      Provider.of<DataProvider>(context, listen: false).toggleFetch(true);
+    } catch (e) {
+      print(e);
     }
   }
 
-  Future fetchWatchlistFromFirestore() async {
+  Future<void> fetchWatchlistFromFirestore() async {
     List<Movie> dummyData = [];
-    if(Provider.of<DataProvider>(context, listen: false).isFetching == true) {
-      FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) {
+    print("Fetching your watchlist");
+    if (Provider.of<DataProvider>(context, listen: false).isFetching == true) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get()
+          .then((value) {
         print("Cloud ${value.data()}");
-        if(value.data() != null) {
+        if (value.data() != null) {
           value.data()!["watchlist"].forEach((element) {
             Movie currMovie = Movie().fromMap(element);
             dataFromFirestore.add(currMovie);
@@ -89,16 +104,19 @@ class _HomeScreenState extends State<HomeScreen> {
           dummyData = dataFromFirestore;
         }
       });
-      ///
+      Provider.of<DataProvider>(context, listen: false).setCloudItems(dummyData);
     }
-    return dummyData;
+    print("len ${dummyData.length}");
   }
 
   @override
   void initState() {
     super.initState();
     getUserName();
-    fetchWatchlistFromFirestore().whenComplete(() => Provider.of<DataProvider>(context, listen: false).toggleFetch());
+    print("1 ${Provider.of<DataProvider>(context, listen: false).isFetching}");
+    if(Provider.of<DataProvider>(context, listen: false).isFetching == true) {
+      fetchWatchlistFromFirestore();
+    }
   }
 
   @override
@@ -154,51 +172,63 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       InkWell(
                         onTap: () {
-                          showDialog(context: context, builder: (_) => AlertDialog(
-                            contentPadding: EdgeInsets.only(top: 30, left: 20, right: 20),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            content: Text("Are you sure you want to log out?", style: TextStyle(color: kBlackColor, fontSize: 18,),),
-                            actions: [
-                              TextButton(
-                                child: Text(
-                                  'Cancel',
-                                  style: TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              TextButton(
-                                child: Text(
-                                  'Yes',
-                                  style: TextStyle(
-                                    color: kBlackColor,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  var userAuth = Provider.of<AuthProvider>(context, listen: false);
-                                  ///saving data to cloud to map it to diff users
-                                  saveWatchlistToFirestore(Provider.of<AuthProvider>(context, listen: false).user);
-                                  userAuth.signOut().whenComplete(() =>
-                                      Navigator.pushReplacement(
-                                          context,
-                                          PageTransition(
-                                              child: OnboardingScreen(),
-                                              type: PageTransitionType.rightToLeft,
-                                          ),
+                          showDialog(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                    contentPadding: EdgeInsets.only(
+                                        top: 30, left: 20, right: 20),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    content: Text(
+                                      "Are you sure you want to log out?",
+                                      style: TextStyle(
+                                        color: kBlackColor,
+                                        fontSize: 18,
                                       ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ));
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        child: Text(
+                                          'Cancel',
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      TextButton(
+                                        child: Text(
+                                          'Yes',
+                                          style: TextStyle(
+                                            color: kBlackColor,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        onPressed: () async {
+                                          Navigator.of(context).pop();
+                                          ///saving data to cloud to map it to diff users
+                                          await saveWatchlistToFirestore();
+                                          var userAuth = Provider.of<AuthProvider>(context, listen: false);
+                                          userAuth.signOut().whenComplete(
+                                                () => Navigator.pushReplacement(
+                                                  context,
+                                                  PageTransition(
+                                                    child: OnboardingScreen(),
+                                                    type: PageTransitionType
+                                                        .rightToLeft,
+                                                  ),
+                                                ),
+                                              );
+                                        },
+                                      ),
+                                    ],
+                                  ));
                         },
                         child: Icon(
                           Icons.logout,
@@ -237,7 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         onTap: () {
                           _searchController.clear();
-                          Provider.of<DataProvider>(context, listen: false).filterItems("");
+                          Provider.of<DataProvider>(context, listen: false)
+                              .filterItems("");
                           FocusScope.of(context).unfocus();
                         },
                       ),
@@ -248,8 +279,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   onChanged: (val) {
                     print("searching");
-                    if(val.length >= 3)
-                      Provider.of<DataProvider>(context, listen: false).filterItems(val);
+                    if (val.length >= 3)
+                      Provider.of<DataProvider>(context, listen: false)
+                          .filterItems(val);
                   },
                 ),
               ),
@@ -277,7 +309,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               icon: Visibility(
                                   visible: false,
                                   child: Icon(Icons.arrow_downward)),
-                              style: TextStyle(fontSize: 14, color: kBlackColor),
+                              style:
+                                  TextStyle(fontSize: 14, color: kBlackColor),
                               value: movies.isSorted,
                               onChanged: (val) {
                                 movies.toggle(val!);
@@ -317,7 +350,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ];
         },
         body: FutureBuilder<void>(
-          future: Provider.of<DataProvider>(context, listen: false).fetchAndSetMovie(dataFromFirestore),
+          future: Provider.of<DataProvider>(context, listen: false)
+              .fetchAndSetMovie(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -373,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Container(
                                     width: App.width(context) / 2,
                                     padding:
-                                    EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                        EdgeInsets.fromLTRB(20, 10, 20, 10),
                                     decoration: BoxDecoration(
                                       color: kWhiteColor,
                                       borderRadius: BorderRadius.circular(8),
@@ -388,7 +422,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
@@ -409,27 +443,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                             "Added on:",
                                             DateFormat('dd-MM-yyyy')
                                                 .format(DateTime.parse(movies
-                                                .items[index].createdOn))
+                                                    .items[index].createdOn))
                                                 .toString()),
                                         //movieDetails("Updated on:", DateFormat('dd-MM-yyyy').format(DateTime.parse(movies.items[index].updatedOn)).toString()),
                                         Spacer(),
                                         Row(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.end,
+                                              MainAxisAlignment.end,
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.end,
+                                              CrossAxisAlignment.end,
                                           children: [
                                             InkWell(
                                               onTap: () =>
                                                   Navigator.of(context).push(
-                                                    PageTransition(
-                                                        child: AddMovieScreen(
-                                                          movie:
+                                                PageTransition(
+                                                    child: AddMovieScreen(
+                                                      movie:
                                                           movies.items[index],
-                                                        ),
-                                                        type: PageTransitionType
-                                                            .rightToLeft),
-                                                  ),
+                                                    ),
+                                                    type: PageTransitionType
+                                                        .rightToLeft),
+                                              ),
                                               child: Icon(
                                                 Icons.edit,
                                                 size: 24,
@@ -439,12 +473,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                               width: 13,
                                             ),
                                             InkWell(
-                                              onTap: () {
+                                              onTap: () async {
                                                 Provider.of<DataProvider>(
-                                                    context,
-                                                    listen: false)
+                                                        context,
+                                                        listen: false)
                                                     .deleteMovie(movies
-                                                    .items[index].name);
+                                                        .items[index].name);
+                                                await FirestoreHelper.deleteMovie(movie: [movies.items[index].toMap()], docId: FirebaseAuth.instance.currentUser!.uid);
                                                 setState(() {});
                                               },
                                               child: Icon(

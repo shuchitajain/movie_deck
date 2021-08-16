@@ -1,40 +1,30 @@
 import 'package:flutter/foundation.dart';
+import 'package:movie_deck/repositories/firestore_helper.dart';
 import '../models/movie_model.dart';
-import 'db_provider.dart';
+import '../repositories/db_helper.dart';
 
 class DataProvider with ChangeNotifier {
   List<Movie> _items = [];
   List<Movie> _filteredItems = [];
-  int sorted = 2;
-  String query = "";
-  bool fetch = true;
+  List<Movie> _cloudItems = [];
+  int _sorted = 2;
+  String _query = "";
+  bool _fetch = true;
 
-  void toggle(int newSort) {
-    sorted = newSort;
-    print("Sort $sorted");
-    notifyListeners();
-  }
-
-  void toggleFetch(){
-    fetch = false;
-    notifyListeners();
-  }
-
-  int get isSorted => sorted;
-  bool get isFetching => fetch;
-
+  int get isSorted => _sorted;
+  bool get isFetching => _fetch;
   List<Movie> get items {
     List<Movie> dummyList = _items;
-    if(query != ""){
+    if(_query != ""){
       dummyList = [..._filteredItems];
-      if(sorted >= 0){
+      if(_sorted >= 0){
         dummyList = sortItems(dummyList);
       } else {
         dummyList = [..._items.reversed];
       }
     }
-    else if(query == ""){
-      if(sorted >= 0)
+    else if(_query == ""){
+      if(_sorted >= 0)
         dummyList = sortItems(dummyList);
       else
         dummyList = [..._items.reversed];
@@ -51,15 +41,31 @@ class DataProvider with ChangeNotifier {
     // }
   }
 
+  void toggle(int newSort) {
+    _sorted = newSort;
+    print("Sort $_sorted");
+    notifyListeners();
+  }
+
+  void toggleFetch(bool shouldFetch){
+    _fetch = shouldFetch;
+    notifyListeners();
+  }
+
+  void setCloudItems(List<Movie> cloudList) {
+    _cloudItems = cloudList;
+    notifyListeners();
+  }
+
   sortItems(List<Movie> currList) {
     List<Movie> dummyList = currList;
-    if(sorted == 0){
+    if(_sorted == 0){
       dummyList.sort((a, b) => a.name.compareTo(b.name));
     }
-    if(sorted == 1){
+    if(_sorted == 1){
       dummyList.sort((b, a) => a.name.compareTo(b.name));
     }
-    if(sorted == 2){
+    if(_sorted == 2){
       dummyList = [...currList.reversed];
     }
     return dummyList;
@@ -67,9 +73,9 @@ class DataProvider with ChangeNotifier {
 
   filterItems(String newQuery) {
     _filteredItems = [];
-    query = newQuery;
+    _query = newQuery;
     _items.forEach((element) {
-      if(element.name.contains(query)){
+      if(element.name.contains(_query)){
         _filteredItems.add(element);
       }
     });
@@ -98,7 +104,7 @@ class DataProvider with ChangeNotifier {
       }
       notifyListeners();
       print("ITEMS $items");
-      DbProvider.createOrUpdate({
+      DbHelper.createOrUpdate({
         'name': newMovie.name,
         'director': newMovie.director,
         'imageUrl': newMovie.imageUrl,
@@ -112,17 +118,18 @@ class DataProvider with ChangeNotifier {
     print("Deleting movie from table");
     items.removeWhere((element) => element.name == movieName);
     notifyListeners();
-    await DbProvider.delete(movieName);
+    await DbHelper.delete(movieName);
   }
 
-  Future<void> fetchAndSetMovie(List<Movie> cloudData) async {
-        if(cloudData.length > 0 && fetch) {
-          cloudData.forEach((element) {
-            DbProvider.createOrUpdate(element.toMap());
+  Future<void> fetchAndSetMovie() async {
+        print('DP: ${_cloudItems.length} $_fetch');
+        if(_cloudItems.length > 0 && _fetch) {
+          _cloudItems.forEach((element) {
+            DbHelper.createOrUpdate(element.toMap());
           });
           print("fetching");
         }
-        final dataList = await DbProvider.read();
+        final dataList = await DbHelper.read();
         print("Reading data from DbProvider: ${dataList.length} movies");
         _items = dataList.map((item) =>
             Movie(
@@ -132,6 +139,7 @@ class DataProvider with ChangeNotifier {
               createdOn: item['createdOn'].toString(),
               updatedOn: item['updatedOn'].toString(),
             ),).toList();
+        toggleFetch(false);
         notifyListeners();
   }
 }
