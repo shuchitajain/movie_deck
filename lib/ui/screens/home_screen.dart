@@ -22,7 +22,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController _searchController = TextEditingController();
-  int sortVal = 2;
   String userName = "User";
 
   Padding movieDetails(String title, String data) {
@@ -231,64 +230,47 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    // IconButton(
-                    //   onPressed: () {
-                    //     Provider.of<DataProvider>(context, listen: false)
-                    //         .toggle();
-                    //   },
-                    //   icon: Icon(
-                    //     Provider.of<DataProvider>(context, listen: false)
-                    //             .isSorted
-                    //         ? FontAwesomeIcons.sortAlphaUp
-                    //         : FontAwesomeIcons.sortAlphaDown,
-                    //     size: 18,
-                    //   ),
-                    // )
-                    Container(
-                      height: 50,
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<int>(
-                          icon: Visibility(
-                              visible: false,
-                              child: Icon(Icons.arrow_downward)),
-                          style: TextStyle(fontSize: 14, color: kBlackColor),
-                          value: sortVal,
-                          onChanged: (val) {
-                            setState(() {
-                              sortVal = val!;
-                            });
-                          },
-                          items: [
-                            DropdownMenuItem(
-                              child: Text("Sort A-Z"),
-                              value: 0,
-                              onTap: () {
-                                Provider.of<DataProvider>(context,
-                                        listen: false)
-                                    .toggle(0);
+                    Consumer<DataProvider>(
+                      builder: (_, movies, ch) {
+                        return Container(
+                          height: 50,
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<int>(
+                              icon: Visibility(
+                                  visible: false,
+                                  child: Icon(Icons.arrow_downward)),
+                              style: TextStyle(fontSize: 14, color: kBlackColor),
+                              value: movies.isSorted,
+                              onChanged: (val) {
+                                movies.toggle(val!);
                               },
+                              items: [
+                                DropdownMenuItem(
+                                  child: Text("Sort A-Z"),
+                                  value: 0,
+                                  onTap: () {
+                                    movies.toggle(0);
+                                  },
+                                ),
+                                DropdownMenuItem(
+                                  child: Text("Sort Z-A"),
+                                  value: 1,
+                                  onTap: () {
+                                    movies.toggle(1);
+                                  },
+                                ),
+                                DropdownMenuItem(
+                                  child: Text("Last Added"),
+                                  value: 2,
+                                  onTap: () {
+                                    movies.toggle(2);
+                                  },
+                                )
+                              ],
                             ),
-                            DropdownMenuItem(
-                              child: Text("Sort Z-A"),
-                              value: 1,
-                              onTap: () {
-                                Provider.of<DataProvider>(context,
-                                        listen: false)
-                                    .toggle(1);
-                              },
-                            ),
-                            DropdownMenuItem(
-                              child: Text("Last Added"),
-                              value: 2,
-                              onTap: () {
-                                Provider.of<DataProvider>(context,
-                                        listen: false)
-                                    .toggle(2);
-                              },
-                            )
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
