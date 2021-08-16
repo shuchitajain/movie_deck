@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:movie_deck/constants.dart';
+import 'package:movie_deck/models/movie_model.dart';
 import 'package:movie_deck/providers/data_provider.dart';
 import 'package:movie_deck/providers/auth_provider.dart';
 import 'package:movie_deck/ui/screens/add_movie_screen.dart';
@@ -23,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController _searchController = TextEditingController();
   String userName = "User";
+  List<Movie> dataFromFirestore = [];
 
   Padding movieDetails(String title, String data) {
     return Padding(
@@ -61,10 +65,40 @@ class _HomeScreenState extends State<HomeScreen> {
     print(userName);
   }
 
+  Future saveWatchlistToFirestore(User? fUser) async {
+    //Creating a collection named 'users' with new document for each user using a unique 'uid'
+    if(Provider.of<DataProvider>(context, listen: false).items.length > 0){
+      List<Map<String, dynamic>> fData = [];
+      Provider.of<DataProvider>(context, listen: false).items.forEach((element) {
+        fData.add(element.toMap());
+      });
+      FirebaseFirestore.instance.collection('users').doc(fUser!.uid).set({'watchlist' : fData,}, SetOptions(merge: true)).then((value) => print("done"));
+    }
+  }
+
+  Future fetchWatchlistFromFirestore() async {
+    List<Movie> dummyData = [];
+    if(Provider.of<DataProvider>(context, listen: false).isFetching == true) {
+      FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get().then((value) {
+        print("Cloud ${value.data()}");
+        if(value.data() != null) {
+          value.data()!["watchlist"].forEach((element) {
+            Movie currMovie = Movie().fromMap(element);
+            dataFromFirestore.add(currMovie);
+          });
+          dummyData = dataFromFirestore;
+        }
+      });
+      ///
+    }
+    return dummyData;
+  }
+
   @override
   void initState() {
     super.initState();
     getUserName();
+    fetchWatchlistFromFirestore().whenComplete(() => Provider.of<DataProvider>(context, listen: false).toggleFetch());
   }
 
   @override
@@ -149,14 +183,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 onPressed: () {
                                   Navigator.of(context).pop();
-                                  var user =
-                                  Provider.of<AuthProvider>(context, listen: false);
-                                  user.signOut().whenComplete(() =>
+                                  var userAuth = Provider.of<AuthProvider>(context, listen: false);
+                                  ///saving data to cloud to map it to diff users
+                                  saveWatchlistToFirestore(Provider.of<AuthProvider>(context, listen: false).user);
+                                  userAuth.signOut().whenComplete(() =>
                                       Navigator.pushReplacement(
                                           context,
                                           PageTransition(
                                               child: OnboardingScreen(),
-                                              type: PageTransitionType.rightToLeft)));
+                                              type: PageTransitionType.rightToLeft,
+                                          ),
+                                      ),
+                                  );
                                 },
                               ),
                             ],
@@ -279,10 +317,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ];
         },
         body: FutureBuilder<void>(
-          future: Provider.of<DataProvider>(context, listen: false)
-              .fetchAndSetMovie(),
+          future: Provider.of<DataProvider>(context, listen: false).fetchAndSetMovie(dataFromFirestore),
           builder: (context, snapshot) {
-            print(snapshot.hasData);
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                 child: CircularProgressIndicator(),
@@ -293,6 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text("No movies yet"),
                 ),
                 builder: (ctx, movies, ch) {
+                  print("${movies.items.length}");
                   if (movies.items.length == 0)
                     return Center(
                       child: Padding(
@@ -306,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     );
-                  else
+                  else {
                     return ListView.builder(
                         padding: EdgeInsets.symmetric(vertical: 8),
                         physics: NeverScrollableScrollPhysics(),
@@ -336,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: Container(
                                     width: App.width(context) / 2,
                                     padding:
-                                        EdgeInsets.fromLTRB(20, 10, 20, 10),
+                                    EdgeInsets.fromLTRB(20, 10, 20, 10),
                                     decoration: BoxDecoration(
                                       color: kWhiteColor,
                                       borderRadius: BorderRadius.circular(8),
@@ -351,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
@@ -372,27 +409,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                             "Added on:",
                                             DateFormat('dd-MM-yyyy')
                                                 .format(DateTime.parse(movies
-                                                    .items[index].createdOn))
+                                                .items[index].createdOn))
                                                 .toString()),
                                         //movieDetails("Updated on:", DateFormat('dd-MM-yyyy').format(DateTime.parse(movies.items[index].updatedOn)).toString()),
                                         Spacer(),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                          MainAxisAlignment.end,
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.end,
+                                          CrossAxisAlignment.end,
                                           children: [
                                             InkWell(
                                               onTap: () =>
                                                   Navigator.of(context).push(
-                                                PageTransition(
-                                                    child: AddMovieScreen(
-                                                      movie:
+                                                    PageTransition(
+                                                        child: AddMovieScreen(
+                                                          movie:
                                                           movies.items[index],
-                                                    ),
-                                                    type: PageTransitionType
-                                                        .rightToLeft),
-                                              ),
+                                                        ),
+                                                        type: PageTransitionType
+                                                            .rightToLeft),
+                                                  ),
                                               child: Icon(
                                                 Icons.edit,
                                                 size: 24,
@@ -404,10 +441,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                             InkWell(
                                               onTap: () {
                                                 Provider.of<DataProvider>(
-                                                        context,
-                                                        listen: false)
+                                                    context,
+                                                    listen: false)
                                                     .deleteMovie(movies
-                                                        .items[index].name);
+                                                    .items[index].name);
                                                 setState(() {});
                                               },
                                               child: Icon(
@@ -425,6 +462,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                         });
+                  }
                 },
               );
             }

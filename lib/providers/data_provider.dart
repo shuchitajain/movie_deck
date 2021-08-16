@@ -7,6 +7,7 @@ class DataProvider with ChangeNotifier {
   List<Movie> _filteredItems = [];
   int sorted = 2;
   String query = "";
+  bool fetch = true;
 
   void toggle(int newSort) {
     sorted = newSort;
@@ -14,7 +15,13 @@ class DataProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleFetch(){
+    fetch = false;
+    notifyListeners();
+  }
+
   int get isSorted => sorted;
+  bool get isFetching => fetch;
 
   List<Movie> get items {
     List<Movie> dummyList = _items;
@@ -43,12 +50,6 @@ class DataProvider with ChangeNotifier {
     //   return [..._filteredItems];
     // }
   }
-
-  // List<Movie> get sortedItems {
-  //   var dummyList = _items;
-  //   dummyList.sort((a, b) => a.name.compareTo(b.name));
-  //   return [...dummyList];
-  // }
 
   sortItems(List<Movie> currList) {
     List<Movie> dummyList = currList;
@@ -114,24 +115,23 @@ class DataProvider with ChangeNotifier {
     await DbProvider.delete(movieName);
   }
 
-  Movie findById(String name) {
-    var ret = _items.firstWhere((element) => element.name == name);
-    notifyListeners();
-    return ret;
-  }
-
-  Future<void> fetchAndSetMovie() async {
+  Future<void> fetchAndSetMovie(List<Movie> cloudData) async {
+        if(cloudData.length > 0 && fetch) {
+          cloudData.forEach((element) {
+            DbProvider.createOrUpdate(element.toMap());
+          });
+          print("fetching");
+        }
         final dataList = await DbProvider.read();
         print("Reading data from DbProvider: ${dataList.length} movies");
         _items = dataList.map((item) =>
             Movie(
-                name: item['name'].toString(),
-                director: item['director'].toString(),
-                imageUrl: item['imageUrl'].toString(),
-                createdOn: item['createdOn'].toString(),
-                updatedOn: item['updatedOn'].toString(),
+              name: item['name'].toString(),
+              director: item['director'].toString(),
+              imageUrl: item['imageUrl'].toString(),
+              createdOn: item['createdOn'].toString(),
+              updatedOn: item['updatedOn'].toString(),
             ),).toList();
-        print("IMAGE: ${_items[0].imageUrl}");
         notifyListeners();
   }
 }
