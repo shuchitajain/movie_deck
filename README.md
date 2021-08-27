@@ -7,5 +7,5 @@ Please feel free to explore both branches.
 
 ## Screenshots 
 
-<img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_01.png" height = "220">   <img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_01.png" height = "220" >   <img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_02.png" height = "220" >   <img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_03.png" height = "220" > 
+<img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_01.png" height = "220">   <img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_02.png" height = "220" >   <img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_03.png" height = "220" > 
 <img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_04.png" height = "220" >   <img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_05.png" height = "220" >   <img src = "https://github.com/shuchitajain/movie_deck/blob/main/flutter_06.png" height = "220" >
